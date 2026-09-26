@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Loader-independent core of the accessibility mod (works with BepInEx, MelonLoader...). -->
+  <PropertyGroup>
+    <AssemblyName>KingdomAccess.Core</AssemblyName>
+    <RootNamespace>KingdomAccess</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="$(BepInExDir)\interop\*.dll" Private="false" />
+    <Reference Include="$(BepInExDir)\core\0Harmony.dll" Private="false" />
+    <Reference Include="$(BepInExDir)\core\Il2CppInterop.Runtime.dll" Private="false" />
+    <Reference Include="$(BepInExDir)\core\Il2CppInterop.Common.dll" Private="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Mod texts live in the repository-level Localization folder; they ship as Lang\*.json. -->
+    <None Include="..\..\Localization\Core\*.json" Link="Lang\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Sounds\*.wav" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

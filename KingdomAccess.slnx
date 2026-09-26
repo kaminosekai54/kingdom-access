@@ -1,0 +1,6 @@
+﻿<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/KingdomAccess.BepInEx/KingdomAccess.BepInEx.csproj" />
+    <Project Path="src/KingdomAccess.Core/KingdomAccess.Core.csproj" />
+  </Folder>
+</Solution>

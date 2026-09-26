@@ -1,0 +1,59 @@
+# ---------------------------------------------------------------
+# Build output and compiled files: never committed
+# ---------------------------------------------------------------
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+[Pp]ublish/
+artifacts/
+*.dll
+*.exe
+*.pdb
+*.cache
+*.nupkg
+*.snupkg
+
+# Release archives (built and attached to GitHub releases, not committed)
+*.zip
+*.7z
+*.rar
+
+# ---------------------------------------------------------------
+# IDE and tool files
+# ---------------------------------------------------------------
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userprefs
+*.DotSettings.user
+__pycache__/
+*.pyc
+
+# ---------------------------------------------------------------
+# Logs and OS files
+# ---------------------------------------------------------------
+*.log
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# ---------------------------------------------------------------
+# Game-related files: never commit or redistribute game assets
+# ---------------------------------------------------------------
+# Screen reader libraries are third-party binaries (see lib/native/README.md);
+# the README in that folder is kept.
+lib/native/*
+!lib/native/README.md
+
+# Local research output extracted from your own copy of the game.
+tools/blazon_ref/
+tools/heimdall_ref/
+tools/thor_ref/
+tools/sheet_*.png
+
+# BepInEx configuration and logs, if copied here while testing
+*.cfg
+LogOutput.log

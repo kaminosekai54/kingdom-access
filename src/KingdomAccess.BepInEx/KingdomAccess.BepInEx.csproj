@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- BepInEx 6 IL2CPP adapter: plugin entry point, configuration file, per-frame update. -->
+  <PropertyGroup>
+    <AssemblyName>KingdomAccess.BepInEx</AssemblyName>
+    <RootNamespace>KingdomAccess.BepInExAdapter</RootNamespace>
+    <PluginDir>$(BepInExDir)\plugins\KingdomAccess</PluginDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\KingdomAccess.Core\KingdomAccess.Core.csproj" />
+    <Reference Include="$(BepInExDir)\core\BepInEx.Core.dll" Private="false" />
+    <Reference Include="$(BepInExDir)\core\BepInEx.Unity.IL2CPP.dll" Private="false" />
+    <Reference Include="$(BepInExDir)\core\0Harmony.dll" Private="false" />
+    <Reference Include="$(BepInExDir)\core\Il2CppInterop.Runtime.dll" Private="false" />
+    <Reference Include="$(BepInExDir)\interop\Il2Cppmscorlib.dll" Private="false" />
+    <Reference Include="$(BepInExDir)\interop\UnityEngine.CoreModule.dll" Private="false" />
+    <Reference Include="$(BepInExDir)\interop\UnityEngine.InputLegacyModule.dll" Private="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Screen reader libraries (Tolk + NVDA controller client, x64). Not part of the repository: see README. -->
+    <NativeLib Include="..\..\lib\native\*.dll" />
+  </ItemGroup>
+
+  <!-- After each build, install the mod into BepInEx\plugins\KingdomAccess (skip with -p:NoDeploy=true). -->
+  <Target Name="DeployToGame" AfterTargets="Build" Condition="'$(NoDeploy)' != 'true'">
+    <ItemGroup>
+      <LangFiles Include="$(OutDir)Lang\*.json" />
+      <SoundFiles Include="$(OutDir)Sounds\*.wav" />
+    </ItemGroup>
+    <Copy SourceFiles="$(OutDir)KingdomAccess.BepInEx.dll;$(OutDir)KingdomAccess.Core.dll" DestinationFolder="$(PluginDir)" />
+    <Copy SourceFiles="@(LangFiles)" DestinationFolder="$(PluginDir)\Lang" />
+    <Copy SourceFiles="@(SoundFiles)" DestinationFolder="$(PluginDir)\Sounds" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(NativeLib)" DestinationFolder="$(PluginDir)" SkipUnchangedFiles="true" />
+    <Message Importance="high" Text="KingdomAccess installed in $(PluginDir)" />
+  </Target>
+</Project>
