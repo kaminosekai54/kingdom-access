@@ -814,5 +814,12 @@
   "keyhelp.runbehindleftwall": "Run behind the left wall",
   "keyhelp.runbehindrightwall": "Run behind the right wall",
   "keyhelp.dumptarget": "Development: inspect the object in front of you",
-  "keyhelp.dumpisland": "Development: inspect the whole island"
+  "keyhelp.dumpisland": "Development: inspect the whole island",
+  "ability.no_relic": "No relic equipped",
+  "steeddesc.unknown": "No known description for this mount",
+  "steeddesc.default": "Basic horse, no special ability",
+  "rulerdesc.miriamrulerability": "Miriam's power: a whip lash sends a wave that freezes the Greed in front of her and stops them for a short time.",
+  "rulerdesc.gebelrulerability": "Gebel's power: he turns into a bat, faster than any mount, for about fifteen seconds. He cannot pick up coins in this form.",
+  "rulerdesc.alfredrulerability": "Alfred's power: he conjures a duplicate of himself and his mount that doubles his powers. The Greed attack the duplicate first.",
+  "rulerdesc.zangetsurulerability": "Zangetsu's power: he raises his katana and briefly speeds up the attacks of nearby archers, pikemen and knights."
 }

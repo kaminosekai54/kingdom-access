@@ -814,5 +814,12 @@
   "keyhelp.runbehindleftwall": "Courir derrière le mur de gauche",
   "keyhelp.runbehindrightwall": "Courir derrière le mur de droite",
   "keyhelp.dumptarget": "Développement : inspecter l'objet devant vous",
-  "keyhelp.dumpisland": "Développement : inspecter toute l'île"
+  "keyhelp.dumpisland": "Développement : inspecter toute l'île",
+  "ability.no_relic": "Pas de relique équipée",
+  "steeddesc.unknown": "Pas de description connue pour cette monture",
+  "steeddesc.default": "Cheval de base, sans capacité particulière",
+  "rulerdesc.miriamrulerability": "Pouvoir de Miriam : un coup de fouet envoie une onde qui gèle les Greed devant elle et les immobilise un court instant.",
+  "rulerdesc.gebelrulerability": "Pouvoir de Gebel : il se change en chauve-souris, plus rapide que toute monture, pendant une quinzaine de secondes. Il ne peut pas ramasser de pièces sous cette forme.",
+  "rulerdesc.alfredrulerability": "Pouvoir d'Alfred : il crée un double de lui et de sa monture, qui double ses pouvoirs. Les Greed attaquent d'abord le double.",
+  "rulerdesc.zangetsurulerability": "Pouvoir de Zangetsu : il lève son katana et accélère un moment les attaques des archers, piquiers et chevaliers proches."
 }

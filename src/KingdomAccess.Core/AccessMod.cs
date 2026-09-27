@@ -203,7 +203,7 @@ public static class AccessMod
 
         if (k["Wallet"].Pressed()) Reports.Wallet(player);
         if (k["Time"].Pressed()) Reports.World();
-        if (k["Mount"].Pressed()) Reports.Mount(player);
+        if (k["Mount"].Pressed()) Abilities.MountReport(player);
         if (k["Abilities"].Pressed()) Abilities.Report(player);
         if (k["Compass"].Pressed()) Reports.Compass(player);
         if (k["Census"].Pressed()) Census.Show(player);

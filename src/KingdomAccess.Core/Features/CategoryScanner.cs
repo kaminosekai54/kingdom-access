@@ -255,16 +255,32 @@ internal static class CategoryScanner
         return items.Values.OrderBy(it => Mathf.Abs(it.X - px)).ToList();
     }
 
-    /// <summary>True if the game allows this tree to be marked for cutting (forest edge).</summary>
+    /// <summary>
+    /// True if this tree can be cut now: the game must allow it to be selected, and it must be
+    /// at the edge of the forest facing the kingdom, i.e. close to the kingdom border on its side
+    /// (trees deeper in the forest cannot be cut until the ones in front of them are gone).
+    /// </summary>
     private static bool IsCuttable(Payable p)
     {
         try
         {
             var tree = p.GetComponent<PayableTree>();
-            return tree == null || tree.isSelectable;
+            if (tree != null && !tree.isSelectable) return false;
+
+            var kingdom = GameState.Managers?.kingdom;
+            if (kingdom == null) return true;
+            float left = kingdom.GetBorderSide(Side.Left);
+            float right = kingdom.GetBorderSide(Side.Right);
+            if (left >= right) return true;
+            float x = p.transform.position.x;
+            if (x >= left && x <= right) return true;       // inside the kingdom
+            return x < left ? left - x <= TreeEdgeMargin : x - right <= TreeEdgeMargin;
         }
         catch { return true; }
     }
+
+    /// <summary>How far beyond the kingdom border a tree still counts as the forest edge.</summary>
+    private const float TreeEdgeMargin = 12f;
 
     /// <summary>Kinds that can exist as an empty spot, to be built.</summary>
     private static bool IsBuildingKind(ObjKind k) => k is ObjKind.Wall or ObjKind.Tower or ObjKind.Farmhouse

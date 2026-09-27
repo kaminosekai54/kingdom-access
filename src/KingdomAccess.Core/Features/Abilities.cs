@@ -28,8 +28,16 @@ internal static class Abilities
             string desc = ItemDescription(player);
             if (desc != null) parts.Add(desc);
         }
+        else parts.Add(Loc.T("ability.no_relic"));
         string ruler = RulerStatus(player, out _);
-        if (ruler != null) parts.Add(ruler);
+        if (ruler != null)
+        {
+            parts.Add(ruler);
+            // Dead Lands monarchs have their own ability; in the Norse Lands and Olympus the
+            // ruler ability is the relic, already described above.
+            string rdesc = RulerDescription(player);
+            if (rdesc != null) parts.Add(rdesc);
+        }
 
         var steed = player.steed;
         if (steed != null)
@@ -37,9 +45,43 @@ internal static class Abilities
             string status = SteedStatus(player, out _);
             parts.Add(Loc.T("ability.mount_is", ObjectNames.SteedTypeName(steed)) + (status != null ? ", " + status : ""));
             string desc = SteedDescription(steed);
-            if (desc != null) parts.Add(desc);
+            parts.Add(desc ?? Loc.T("steeddesc.unknown"));
         }
         SpeechOut.Say(parts.Count > 0 ? string.Join(". ", parts) : Loc.T("ability.none"));
+    }
+
+    /// <summary>
+    /// Mount shortcut: name, tired or ready, ability state, and what the mount does.
+    /// </summary>
+    public static void MountReport(Player player)
+    {
+        var steed = player.steed;
+        if (steed == null) { SpeechOut.Say(Loc.T("report.no_mount")); return; }
+        var parts = new List<string>
+        {
+            $"{ObjectNames.SteedTypeName(steed)}, {Loc.T(steed.IsTired ? "mount.tired" : "mount.ready")}"
+        };
+        string status = SteedStatus(player, out _);
+        if (status != null) parts.Add(status);
+        parts.Add(SteedDescription(steed) ?? Loc.T("steeddesc.unknown"));
+        SpeechOut.Say(string.Join(". ", parts));
+    }
+
+    /// <summary>
+    /// What the monarch's own ability does (Dead Lands monarchs), from the ability's class name
+    /// (MiriamRulerAbility...). Relic-based abilities return null: the relic is described instead.
+    /// </summary>
+    private static string RulerDescription(Player player)
+    {
+        try
+        {
+            var ability = player.GetComponentInChildren<RulerAbility>(true);
+            if (ability == null) return null;
+            string type = ability.GetIl2CppType().Name;
+            if (type == "ItemBasedRulerAbility") return null;
+            return Loc.TryT("rulerdesc." + type.ToLowerInvariant());
+        }
+        catch { return null; }
     }
 
     private static string ItemDescription(Player player)
