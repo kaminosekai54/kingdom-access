@@ -152,6 +152,10 @@ internal static class CategoryScanner
                 var info = ObjectNames.Identify(p);
                 if (CategoryOf(info.Kind) != cat) continue;
 
+                // Trees: only the ones that can be cut right now (the edge trees of a forest,
+                // as decided by the game), not the whole forest behind them.
+                if (info.Kind == ObjKind.Tree && !IsCuttable(p)) continue;
+
                 // Building spot not built yet (farm, wall, tower...): listed only if it
                 // can be built now, and announced as such. Only for real buildings:
                 // a puzzle or a character is never "to build".
@@ -249,6 +253,17 @@ internal static class CategoryScanner
         }
 
         return items.Values.OrderBy(it => Mathf.Abs(it.X - px)).ToList();
+    }
+
+    /// <summary>True if the game allows this tree to be marked for cutting (forest edge).</summary>
+    private static bool IsCuttable(Payable p)
+    {
+        try
+        {
+            var tree = p.GetComponent<PayableTree>();
+            return tree == null || tree.isSelectable;
+        }
+        catch { return true; }
     }
 
     /// <summary>Kinds that can exist as an empty spot, to be built.</summary>
