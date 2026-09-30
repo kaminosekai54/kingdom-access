@@ -11,7 +11,8 @@ public enum ObjKind
     Unknown, Castle, Wall, Tower, Shop, Tree, Beggar, BeggarCamp, Hermit, Merchant, Chest,
     GemChest, GemGuard, Banker, Portal, Teleporter, Statue, CrownStatue, Steed, Boat, Wharf,
     Farmhouse, Farmland, Workshop, Bush, Lighthouse, Horn, Shield, Bomb, Dog, Quarry, Mine,
-    Bakery, Stable, Forge, Dojo, Ballista, CitizenHouse, Banner, Bell, Upgrade, Puzzle, CaveBomb, CaveNest
+    Bakery, Stable, Forge, Dojo, Ballista, CitizenHouse, Banner, Bell, Upgrade, Puzzle, CaveBomb, CaveNest,
+    Oracle, Shipyard, Border
 }
 
 public struct ObjInfo
@@ -41,6 +42,13 @@ internal static class ObjectNames
         var dlc = DlcObjects.Identify(go);
         if (dlc.HasValue) return dlc.Value;
 
+        // Olympus objects are recognised by component name: touching an Olympus type in another
+        // world (where it was never loaded) can crash the IL2CPP runtime.
+        var names = ComponentNames(go);
+        if (names.Contains("Oracle")) return Named(ObjKind.Oracle);
+        if (names.Contains("Shipyard")) return Named(ObjKind.Shipyard);
+        if (names.Contains("PayableBorder")) return Named(ObjKind.Border);
+
         if (go.GetComponent<Castle>() != null) return Named(ObjKind.Castle);
         if (go.GetComponent<Wall>() != null) return Named(ObjKind.Wall);
         if (go.GetComponent<Tower>() != null) return Named(ObjKind.Tower);
@@ -59,7 +67,11 @@ internal static class ObjectNames
         if (go.GetComponent<PayableCrownStatue>() != null || go.GetComponent<UnlockNewRulerStatue>() != null) return Named(ObjKind.CrownStatue);
         if (go.GetComponent<Statue>() != null) return Info(ObjKind.Statue, StatueName(go.GetComponent<Statue>()));
         if (go.GetComponent<SteedSpawn>() != null) return Info(ObjKind.Steed, SteedName(go.GetComponent<SteedSpawn>()));
-        if (go.GetComponent<Boat>() != null || go.GetComponent<PayableBoat>() != null || go.GetComponent<BoatSailPosition>() != null) return Named(ObjKind.Boat);
+        // A mount standing in the world, waiting to be bought or ridden (e.g. the Olympus griffin).
+        var steed = go.GetComponent<Steed>();
+        if (steed != null) return Info(ObjKind.Steed, Loc.T("steed.format", SteedTypeName(steed)));
+        if (go.GetComponent<Boat>() != null || go.GetComponent<PayableBoat>() != null || go.GetComponent<BoatSailPosition>() != null)
+            return Info(ObjKind.Boat, BoatName(c, go));
         if (go.GetComponent<Wharf>() != null) return Named(ObjKind.Wharf);
         if (go.GetComponent<Farmhouse>() != null) return Named(ObjKind.Farmhouse);
         if (go.GetComponent<Farmland>() != null) return Named(ObjKind.Farmland);
@@ -99,6 +111,37 @@ internal static class ObjectNames
             case PayableShop.ShopType.WorkshopRight: return Loc.T("shop.workshop");
             default: return null;
         }
+    }
+
+    /// <summary>Il2Cpp type names of every component of an object (no type is touched).</summary>
+    private static HashSet<string> ComponentNames(GameObject go)
+    {
+        var set = new HashSet<string>();
+        try
+        {
+            foreach (var comp in go.GetComponents<Component>())
+                if (comp != null) set.Add(comp.GetIl2CppType().Name);
+        }
+        catch { }
+        return set;
+    }
+
+    /// <summary>
+    /// Distinct names for the boat parts: wreck, hull being built, set-sail point, the boat itself.
+    /// </summary>
+    private static string BoatName(Component c, GameObject go)
+    {
+        try
+        {
+            if (go.name.ToLowerInvariant().Contains("wreck")) return Loc.T("boat.wreck");
+            if (go.GetComponent<BoatSailPosition>() != null)
+            {
+                var p = go.GetComponent<Payable>();
+                return Loc.T(p != null && p.Price >= 10 ? "boat.sail" : "boat.build");
+            }
+        }
+        catch { }
+        return Loc.T("obj.boat");
     }
 
     private static string StatueName(Statue s)

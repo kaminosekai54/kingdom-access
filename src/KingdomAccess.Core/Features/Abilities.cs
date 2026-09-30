@@ -64,7 +64,24 @@ internal static class Abilities
         string status = SteedStatus(player, out _);
         if (status != null) parts.Add(status);
         parts.Add(SteedDescription(steed) ?? Loc.T("steeddesc.unknown"));
+        string trigger = TriggerNote(steed);
+        if (trigger != null) parts.Add(trigger);
         SpeechOut.Say(string.Join(". ", parts));
+    }
+
+    /// <summary>
+    /// How to trigger the mount ability, only when the game says the ability is manual
+    /// (automatic ones, like the stag luring deer, need no key).
+    /// </summary>
+    private static string TriggerNote(Steed steed)
+    {
+        try
+        {
+            var ability = steed.GetComponentInChildren<SteedAbility>(true);
+            if (ability == null || ability.IsAutomaticAbility) return null;
+            return Loc.T("steed.trigger");
+        }
+        catch { return null; }
     }
 
     /// <summary>

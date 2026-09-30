@@ -133,7 +133,12 @@ Press **F1** in game for the list of your current shortcuts.
 2. **The mod.** Extract the release archive into `Kingdom Two Crowns\BepInEx\plugins`. You should
    get `BepInEx\plugins\KingdomAccess\` containing `KingdomAccess.BepInEx.dll`, `KingdomAccess.Core.dll`,
    `Tolk.dll`, `nvdaControllerClient64.dll`, and the `Lang` and `Sounds` folders.
-3. **Start the game** with your screen reader running. After a few seconds you should hear
+3. **NVDA users: install the NVDA add-on** `kingdomAccessSleep` (attached to each release; open
+   the `.nvda-addon` file with NVDA running). NVDA normally stops speaking at every key press,
+   which cuts the mod's announcements all the time in a game; the add-on puts NVDA in sleep
+   mode while Kingdom Two Crowns has the focus, so only new announcements interrupt speech.
+   NVDA+Shift+S still toggles sleep mode. Without the add-on, press NVDA+Shift+S in the game.
+4. **Start the game** with your screen reader running. After a few seconds you should hear
    "Kingdom Access version ... loaded".
 
 ## Configuration
@@ -199,6 +204,7 @@ src/KingdomAccess.Core      the mod itself, independent of the mod loader
   Features/               announcements, scanner, radar, reports, auto-walk, menus, alerts...
   Patches/                Harmony patches (world map, blazon editor)
 src/KingdomAccess.BepInEx   BepInEx 6 IL2CPP adapter (entry point, configuration file)
+nvda-addon/                 NVDA add-on: sleep mode for the game (build: python tools/build_nvda_addon.py)
 Localization/             mod texts, one file per language
 tools/                    sound generator, localization checks, research helpers
 ```

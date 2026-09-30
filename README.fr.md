@@ -123,7 +123,13 @@ l'écran partagé). **F1** en jeu donne la liste de vos raccourcis actuels.
 2. **Le mod.** Décompressez l'archive de la version dans `Kingdom Two Crowns\BepInEx\plugins`. Vous
    devez obtenir `BepInEx\plugins\KingdomAccess\` avec `KingdomAccess.BepInEx.dll`,
    `KingdomAccess.Core.dll`, `Tolk.dll`, `nvdaControllerClient64.dll` et les dossiers `Lang` et `Sounds`.
-3. **Lancez le jeu** avec votre lecteur d'écran. Après quelques secondes, vous devez entendre
+3. **Utilisateurs de NVDA : installez le module complémentaire NVDA** `kingdomAccessSleep` (joint à
+   chaque version ; ouvrez le fichier `.nvda-addon` avec NVDA lancé). NVDA coupe normalement la
+   parole à chaque touche pressée, ce qui interrompt sans cesse les annonces du mod dans un jeu ;
+   le module met NVDA en mode veille quand Kingdom Two Crowns a le focus, et seules les nouvelles
+   annonces coupent la parole. NVDA+Maj+S permet toujours d'en sortir. Sans le module, faites
+   NVDA+Maj+S dans le jeu.
+4. **Lancez le jeu** avec votre lecteur d'écran. Après quelques secondes, vous devez entendre
    « Kingdom Access version ... chargée ».
 
 ## Configuration

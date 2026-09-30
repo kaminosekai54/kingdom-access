@@ -13,7 +13,7 @@ internal static class HoverAnnouncer
 {
     // Debounce: the object must stay selected for a moment before being announced,
     // and an object left then found again right away is not announced again.
-    private const float SettleDelay = 0.2f;
+    private const float SettleDelay = 0.05f;
     private const float RepeatSuppression = 4f;
 
     private static Payable _last;
@@ -34,6 +34,8 @@ internal static class HoverAnnouncer
     public static void Tick(Player player, AccessSettings s, float now)
     {
         Payable target = Selected(player);
+        // While galloping the game selects nothing: announce what the player rides past.
+        if (target == null && IsRunning(player)) target = Passing(player);
         if (target == null)
         {
             _candidate = null;
@@ -69,6 +71,33 @@ internal static class HoverAnnouncer
             _lastSpokenAt = now;
         }
         _last = target;
+    }
+
+    private static bool IsRunning(Player player)
+    {
+        try { return player.isRunning || player.actionState == Player.ActionState.Run; }
+        catch { return false; }
+    }
+
+    private const float PassingRange = 1.5f;
+    private static float _nextPassingScan;
+    private static Payable _passingCache;
+
+    /// <summary>
+    /// Nearest available payable within a short range, used while galloping (searched ten times
+    /// per second). Trees, bushes and fields are skipped so that riding through a forest does
+    /// not flood the speech.
+    /// </summary>
+    private static Payable Passing(Player player)
+    {
+        if (Time.unscaledTime < _nextPassingScan) return _passingCache;
+        _nextPassingScan = Time.unscaledTime + 0.1f;
+        _passingCache = null;
+        var p = SelectedOrClosest(player, PassingRange);
+        if (p == null) return null;
+        var kind = ObjectNames.Identify(p).Kind;
+        _passingCache = kind is ObjKind.Tree or ObjKind.Bush or ObjKind.Farmland ? null : p;
+        return _passingCache;
     }
 
     /// <summary>Object selected by the game for interaction, or null.</summary>
@@ -232,7 +261,7 @@ internal static class HoverAnnouncer
             case ObjKind.CrownStatue:
             case ObjKind.Puzzle: return currency == CurrencyType.Gems ? "act.pay" : "act.activate";
             case ObjKind.Steed: return "act.ride";
-            case ObjKind.CaveBomb: return "act.push";
+            case ObjKind.CaveBomb: return "act.push"; case ObjKind.Oracle: return "act.consult"; case ObjKind.Shipyard: return "act.build_ship"; case ObjKind.Border: return "act.activate";
             case ObjKind.Banner: return "act.expedition";
             case ObjKind.Bell: return "act.call";
             case ObjKind.Boat:

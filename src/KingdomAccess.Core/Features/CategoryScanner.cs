@@ -297,12 +297,12 @@ internal static class CategoryScanner
         ObjKind.Shop or ObjKind.Workshop or ObjKind.Bomb or ObjKind.Forge or ObjKind.Shield => ScanCategory.Shops,
         ObjKind.Castle or ObjKind.Farmhouse or ObjKind.Farmland or ObjKind.Lighthouse
             or ObjKind.Quarry or ObjKind.Mine or ObjKind.Bakery or ObjKind.Stable or ObjKind.Dojo
-            or ObjKind.CitizenHouse or ObjKind.Upgrade or ObjKind.Bell or ObjKind.Banner => ScanCategory.Buildings,
+            or ObjKind.CitizenHouse or ObjKind.Upgrade or ObjKind.Bell or ObjKind.Banner or ObjKind.Border => ScanCategory.Buildings,
         ObjKind.Steed => ScanCategory.Mounts,
         ObjKind.Statue or ObjKind.CrownStatue => ScanCategory.Statues,
-        ObjKind.Hermit or ObjKind.Merchant or ObjKind.Banker or ObjKind.Dog => ScanCategory.Characters,
+        ObjKind.Hermit or ObjKind.Merchant or ObjKind.Banker or ObjKind.Dog or ObjKind.Oracle => ScanCategory.Characters,
         ObjKind.Chest or ObjKind.GemChest or ObjKind.GemGuard => ScanCategory.Treasure,
-        ObjKind.Boat or ObjKind.Wharf or ObjKind.Teleporter => ScanCategory.Travel,
+        ObjKind.Boat or ObjKind.Wharf or ObjKind.Teleporter or ObjKind.Shipyard => ScanCategory.Travel,
         // Portals come from the unit cache (with their state), not from the payable list.
         ObjKind.Portal => null,
         ObjKind.Puzzle => ScanCategory.Puzzles,

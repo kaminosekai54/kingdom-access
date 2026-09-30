@@ -18,6 +18,7 @@ artifacts/
 *.zip
 *.7z
 *.rar
+*.nvda-addon
 
 # ---------------------------------------------------------------
 # IDE and tool files
