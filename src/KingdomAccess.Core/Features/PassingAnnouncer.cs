@@ -66,7 +66,7 @@ internal static class PassingAnnouncer
             string full = p != null ? HoverAnnouncer.DescribeCore(player, p) : null;
             if (!string.IsNullOrEmpty(full)) text = full;
         }
-        SpeechOut.Say(text, false);
+        SpeechOut.Say(text, true); // each new object passed cuts the previous one
     }
 
     private static bool IsRunning(Player player)

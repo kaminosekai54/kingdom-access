@@ -74,17 +74,8 @@ internal static class Reports
         var p = HoverAnnouncer.SelectedOrClosest(player, s.HoverRange);
         if (p == null) { SpeechOut.Say(Loc.T("report.no_target")); return; }
 
+        // The description already gives the level, price, action and requirements.
         string text = HoverAnnouncer.Describe(player, p);
-        var go = p.gameObject;
-        int level = -1;
-        var wall = go.GetComponent<Wall>();
-        if (wall != null) level = wall.level;
-        var castle = go.GetComponent<Castle>();
-        if (castle != null) level = (int)castle.level + 1;
-        var tower = go.GetComponent<Tower>();
-        if (tower != null) level = tower.level;
-        if (level >= 0) text += ", " + Loc.T("report.level", level);
-
         text += ", " + Directions.DistanceSide(p.transform.position.x - GameState.PlayerX(player));
         SpeechOut.Say(text);
     }
@@ -98,7 +89,7 @@ internal static class Reports
         var go = p.gameObject;
         log.Info($"[Dump] Object '{go.name}' at x={p.transform.position.x:0.0}");
         foreach (var comp in go.GetComponents<Component>())
-            if (comp != null) log.Info($"[Dump]   Composant : {comp.GetIl2CppType().FullName}");
+            if (comp != null) log.Info($"[Dump]   Component: {comp.GetIl2CppType().FullName}");
         foreach (var prop in p.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public))
         {
             if (prop.GetIndexParameters().Length > 0) continue;

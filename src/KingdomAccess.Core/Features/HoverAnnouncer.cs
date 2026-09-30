@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using KingdomAccess.Game;
 using KingdomAccess.Localization;
 using UnityEngine;
@@ -62,7 +63,8 @@ internal static class HoverAnnouncer
 
         if (target != _last || message != _lastMessage)
         {
-            SpeechOut.Say(message, false);
+            // A new object cuts the previous announcement; an update of the same object waits.
+            SpeechOut.Say(message, target != _last);
             _lastMessage = message;
             _lastSpokenMessage = message;
             _lastSpokenTarget = target;
@@ -148,20 +150,63 @@ internal static class HoverAnnouncer
         return text;
     }
 
+    /// <summary>
+    /// Full sentence for a payable, always in the same order: name and level, price, action
+    /// (with the target level for an upgrade), then why it cannot be paid right now or how many
+    /// coins are missing. Example: "Wall, level 2, 6 coins, upgrade to level 3, 2 coins missing".
+    /// </summary>
     internal static string DescribeCore(Player player, Payable p)
     {
         var a = Analyze(player, p);
-        if (!string.IsNullOrEmpty(a.LockText)) return $"{a.Name}, {a.LockText}";
-        if (!GameState.CanPayNow(p))
-            return $"{a.Name}, {DlcObjects.WhyUnavailable(p.gameObject, player) ?? Loc.T("state.unavailable_now")}";
+        var parts = new List<string>();
 
-        string action = a.ActionKey == null ? null : Loc.T(a.ActionKey);
+        int level = LevelOf(p.gameObject);
+        parts.Add(level > 0 ? Loc.T("hover.name_level", a.Name, level) : a.Name);
+
         bool freeAction = a.Info.Kind is ObjKind.GemChest or ObjKind.GemGuard or ObjKind.Banker;
-        if (a.Price <= 0 && !freeAction)
-            return action == null ? a.Name : $"{a.Name}, {action}";
+        if (a.Price > 0 || freeAction) parts.Add(Price(a.Price, a.Currency));
 
-        string cost = Price(a.Price, a.Currency);
-        return action == null ? $"{a.Name}, {cost}" : $"{a.Name}, {cost}, {action}";
+        if (a.ActionKey != null)
+            parts.Add(a.ActionKey == "act.upgrade" && level > 0 ? Loc.T("act.upgrade_to", level + 1) : Loc.T(a.ActionKey));
+
+        if (!string.IsNullOrEmpty(a.LockText)) parts.Add(a.LockText);
+        else if (!GameState.CanPayNow(p))
+            parts.Add(DlcObjects.WhyUnavailable(p.gameObject, player) ?? Missing(player, a) ?? Loc.T("state.unavailable_now"));
+        else
+        {
+            string missing = Missing(player, a);
+            if (missing != null) parts.Add(missing);
+        }
+        return string.Join(", ", parts);
+    }
+
+    /// <summary>Current level of a wall, tower or castle (1 = first level), or 0 if not applicable.</summary>
+    public static int LevelOf(GameObject go)
+    {
+        try
+        {
+            var wall = go.GetComponent<Wall>();
+            if (wall != null) return wall.level;
+            var tower = go.GetComponent<Tower>();
+            if (tower != null) return tower.level;
+            var castle = go.GetComponent<Castle>();
+            if (castle != null) return (int)castle.level + 1;
+        }
+        catch { }
+        return 0;
+    }
+
+    /// <summary>"2 coins missing" when the wallet cannot pay the price, otherwise null.</summary>
+    private static string Missing(Player player, Analysis a)
+    {
+        try
+        {
+            if (a.Price <= 0) return null;
+            int have = player.wallet.GetCurrency(a.Currency);
+            if (have >= a.Price) return null;
+            return Loc.T("hover.missing", Price(a.Price - have, a.Currency));
+        }
+        catch { return null; }
     }
 
     public static string Price(int amount, CurrencyType currency)

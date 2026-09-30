@@ -635,7 +635,7 @@
   "ability.steed_ready": "Capacité de la monture prête",
   "lock.invalid": "indisponible",
   "lock.invalidtime": "pas disponible à ce moment de la journée",
-  "lock.invalidregion": "pas disponible à cet endroit",
+  "lock.invalidregion": "hors de la zone constructible : abattez la forêt jusque-là pour étendre le royaume",
   "lock.needspassengerballista": "nécessite l'ermite de la baliste à bord",
   "lock.needspassengerknight": "nécessite l'ermite chevalier à bord",
   "lock.needspassengerhorse": "nécessite l'ermite de l'écurie à bord",
@@ -867,5 +867,8 @@
   "pad.dpaddown": "croix bas",
   "pad.dpadleft": "croix gauche",
   "pad.dpadright": "croix droite",
-  "key.e": "E"
+  "key.e": "E",
+  "hover.name_level": "{0}, niveau {1}",
+  "act.upgrade_to": "améliorer au niveau {0}",
+  "hover.missing": "il vous manque {0}"
 }
