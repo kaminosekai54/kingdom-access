@@ -7,7 +7,7 @@ with sounds when danger approaches.
 
 *[Version française](README.fr.md)*
 
-> Status: **beta (0.8.0)**. Developed and tested by a blind player with NVDA on Windows, on the
+> Status: **beta (0.9.0)**. Developed and tested by a blind player with NVDA on Windows, on the
 > Steam version of the game, mostly in the Norse Lands campaign. Feedback and bug reports are welcome.
 
 ---
@@ -35,6 +35,7 @@ with sounds when danger approaches.
 - Follows the game language automatically, and switches when you change it in the game options.
   French and English are included; other languages fall back to English (see [Languages](#languages)).
 - History of the last 50 messages (repeat, previous, next).
+- Keyboard and gamepad: every shortcut exists on both, and all of them are configurable.
 
 **Menus and screens**
 - Standard menus: selected element, its type (checkbox, slider), state, position ("2 of 5"),
@@ -47,8 +48,10 @@ with sounds when danger approaches.
   collected in a browsable list.
 
 **Around you**
-- The object selected by the game (the point where you can pay) is announced with its price,
-  action, or the reason why it is locked.
+- The object selected by the game (the point where you can pay) is announced with its level
+  (walls, towers, castle), price, action (with the target level for an upgrade), and what is
+  missing: a requirement (stone or iron technology, castle level, hermit, time of day...) or the
+  coins you lack. Moving to another object interrupts the previous announcement.
 - While galloping (the game selects nothing then), every useful object you ride past is announced:
   castle, shops, merchant, mounts, statues, puzzles, portals, chests, forest-edge trees...
 - Entering and leaving the kingdom and vagrant camps; direction of the base camp when you land.
@@ -76,8 +79,11 @@ with sounds when danger approaches.
 - Norse Lands puzzles: Heimdall (time of day of each pillar, mount required, horn), Thor (current
   rune of each pillar, whether it is right, how many are right), Hel (what each sconce is waiting
   for), Loki (how to proceed and the risks). Solved puzzles are announced.
-- Descriptions of the Norse relics (Thor's hammer, Hel's trophy, Heimdall's horn, Loki's staff),
-  some Olympus artifacts and many mounts.
+- What every relic and artifact does (Thor's hammer, Hel's trophy, Heimdall's horn, Loki's staff,
+  Athena's shield, Hermes's staff, Hephaestus's hammer, Artemis's bow), the Dead Lands monarchs'
+  powers, and every mount's special ability (with the key that triggers it).
+- Call of Olympus objects: oracle, shipyard, border stones, mounts to buy; distinct names for the
+  boat parts (wreck, construction, set-sail point, boat).
 - Bomb expedition to the Greed cave: every stage is announced (escort, entrance, crossing,
   guardian, detonation, exit), and while you are beyond the cliff portal the scanner and radar
   only show that area.
@@ -92,8 +98,9 @@ with sounds when danger approaches.
   source).
 - **Other game languages** get the game's own texts but the mod's texts in English until a
   translation is added.
-- **MelonLoader** is not supported yet (the core is loader-independent; only a BepInEx adapter
-  exists). The Mono version of the game has not been tested.
+> **Note:** all the mod's features should work in multiplayer, except perhaps interactions with the
+> other player (their position, buying a new crown). This has not been tested yet.
+
 
 ## Keys
 
@@ -151,12 +158,17 @@ the pad, so a mod shortcut never drops a coin or moves the monarch.
 
 ## Installation
 
-1. **BepInEx 6 (IL2CPP).** The game needs BepInEx 6 bleeding edge for IL2CPP, with the patches
-   that make it work with this game. Follow the install steps of
-   [abevol/KingdomMod](https://github.com/abevol/KingdomMod#install) (BepInEx build and the
-   Cpp2IL / Il2CppInterop patches). Launch the game once so BepInEx generates its files.
-2. **The mod.** Extract the release archive into `Kingdom Two Crowns\BepInEx\plugins`. You should
-   get `BepInEx\plugins\KingdomAccess\` containing `KingdomAccess.BepInEx.dll`, `KingdomAccess.Core.dll`,
+1. **BepInEx 6 (IL2CPP) and its patches.** The game needs BepInEx 6 bleeding edge for IL2CPP, plus
+   two patches made for this game by [abevol/KingdomMod](https://github.com/abevol/KingdomMod#install)
+   (recent game updates broke BepInEx without them):
+   - [BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.753](https://builds.bepinex.dev/projects/bepinex_be/753/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.753%2B0d275a4.zip): extract it into the game folder, so that
+     the `BepInEx` folder and `winhttp.dll` are next to `KingdomTwoCrowns.exe`.
+   - [Cpp2IL.Patch](https://github.com/abevol/KingdomMod/releases/download/2.4.0/Cpp2IL.Patch.zip) and [Il2CppInterop.Patch](https://github.com/abevol/KingdomMod/releases/download/2.4.3/Il2CppInterop.Patch.zip): extract both into the game folder
+     too, replacing the files with the same name.
+
+   Launch the game once so BepInEx generates its files (the first launch takes longer).
+2. **The mod.** Extract the release archive `KingdomAccess-<version>.zip` into the game folder (the
+   one containing `KingdomTwoCrowns.exe`). You should get `BepInEx\plugins\KingdomAccess\` containing `KingdomAccess.BepInEx.dll`, `KingdomAccess.Core.dll`,
    `Tolk.dll`, `nvdaControllerClient64.dll`, and the `Lang` and `Sounds` folders.
 3. **NVDA users: install the NVDA add-on** `kingdomAccessKeys` (attached to each release; open
    the `.nvda-addon` file with NVDA running). NVDA normally stops speaking at every key press,
@@ -173,14 +185,16 @@ the pad, so a mod shortcut never drops a coin or moves the monarch.
 shortcut is documented in the file. Sections:
 
 1. **General**: on/off, forced language, Windows voice fallback, history size.
-2. **Announcements**: object selected by the game, kingdom and camp zones, on-screen texts and
-   tutorial, abilities ready.
+2. **Announcements**: object selected by the game, objects passed while galloping, kingdom and
+   camp zones, on-screen texts and tutorial, abilities ready.
 3. **Radar and scanner**: ranges, explored-area-only mode and its margin, destroyed portals.
 4. **Alerts and sounds**: enemy alert and its distance, crown alert, day phases, sounds.
 5. **Menus**: menu narration, menu logging (development).
 6. **Keys**: every shortcut, e.g. `Wallet = O`, `Radar = V`, `TargetDetails = X`. Key names
    are Unity key names (`F5`, `PageDown`, `LeftArrow`...); modifiers are `Ctrl`, `Shift`, `Alt`.
-   Leave a value empty to disable a shortcut.
+   Leave a value empty to disable a shortcut. Old defaults that used Shift are updated automatically.
+7. **Gamepad**: gamepad on/off, blocking the game while a layer button is held, the layer buttons,
+   and every gamepad shortcut (e.g. `PadWallet = RB+A`).
 
 Restart the game after editing the file. Sounds are WAV files in `plugins\KingdomAccess\Sounds`:
 replace one with your own file of the same name to change it.
@@ -195,18 +209,11 @@ Adding a language means copying `en.json`, translating the values, and checking 
 
 These parts work in principle but have not been confirmed in game, or only partly:
 
-- Auto-**run** (Ctrl+End, B, Ctrl+C, Ctrl+arrows): the mod asks the game to gallop; confirm the
-  monarch really runs with every mount.
-- Heimdall puzzle: the mount requirement (day-night horse) is deduced from game files.
-- Thor puzzle: what makes the pillars active is unknown; the mod reports "inactive".
-- Hel and Loki puzzles: announcements written from the game code, not played through yet.
-- Call of Olympus: puzzles (Cerberus, Chariot), quests, Hermes staff, mounts.
-- Greed cave: "temporary portals" are assumed to be the Greed nests; the distances to the cave
-  entrance and detonation point may be wrong.
-- Gamepad: tested only by building; check every layer shortcut with a real pad.
+- Gamepad: check every layer shortcut with a real pad, and that the game gets the pad back when
+  LB or RB is released. LB and RB are assumed unused by the game.
 - Announcements while galloping: may need tuning (too many or too few).
-- Lost crown alert: make sure the worn crown never triggers a false alert.
 - On-screen text reading: may be too talkative in some places (can be turned off).
+- Multiplayer features.
 
 When something is wrong, `Alt+F3` next to it writes the whole island to
 `BepInEx\LogOutput.log`: attach that file to your report.
@@ -221,6 +228,8 @@ launched once (the build references the interop assemblies BepInEx generates).
 2. If the game is not in the default Steam folder, edit `GameDir` in `Directory.Build.props`.
 3. `dotnet build KingdomAccess.slnx -c Release` builds and installs the mod into the game
    (close the game first). Add `-p:NoDeploy=true` to build without installing.
+4. `python tools/make_release.py` builds the release files into `dist/`: the zip to extract into
+   the game folder, and the NVDA add-on.
 
 Project layout:
 
@@ -234,12 +243,9 @@ src/KingdomAccess.Core      the mod itself, independent of the mod loader
 src/KingdomAccess.BepInEx   BepInEx 6 IL2CPP adapter (entry point, configuration file)
 nvda-addon/                 NVDA add-on: game keys do not interrupt speech (build: python tools/build_nvda_addon.py)
 Localization/             mod texts, one file per language
-tools/                    sound generator, localization checks, research helpers
+tools/                    sound generator, localization checks, NVDA add-on build, research helpers
 ```
 
-Development notes: never ask the game for "all objects of type X" with a DLC type that may not
-be loaded in the current world (it can crash the IL2CPP runtime); never patch methods that other
-mods commonly patch (unit `Awake`); prefer polling to patching virtual methods.
 
 ## Credits
 

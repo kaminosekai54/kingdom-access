@@ -15,7 +15,7 @@ namespace KingdomAccess;
 /// </summary>
 public static class AccessMod
 {
-    public const string Version = "0.8.0";
+    public const string Version = "0.9.0";
 
     private static ModContext _ctx;
     private static bool _initialized;

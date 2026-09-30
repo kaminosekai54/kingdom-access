@@ -870,5 +870,8 @@
   "key.e": "E",
   "hover.name_level": "{0}, niveau {1}",
   "act.upgrade_to": "améliorer au niveau {0}",
-  "hover.missing": "il vous manque {0}"
+  "hover.missing": "il vous manque {0}",
+  "obj.puzzle": "Énigme",
+  "unitname.beggar": "Vagabond",
+  "steeddesc.reindeer": "Comme le cerf : plus rapide en forêt, attire les cerfs sauvages."
 }

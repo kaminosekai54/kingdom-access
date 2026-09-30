@@ -7,7 +7,7 @@ vous prévient par des sons quand le danger approche.
 
 *[English version](README.md)*
 
-> État : **bêta (0.8.0)**. Développé et testé par un joueur aveugle avec NVDA sous Windows, sur la
+> État : **bêta (0.9.0)**. Développé et testé par un joueur aveugle avec NVDA sous Windows, sur la
 > version Steam du jeu, surtout dans la campagne des Terres du Nord. Retours et signalements de
 > bugs bienvenus.
 
@@ -21,6 +21,7 @@ vous prévient par des sons quand le danger approche.
 - Suit automatiquement la langue du jeu, y compris quand vous la changez dans les options.
   Français et anglais inclus ; les autres langues retombent sur l'anglais (voir [Langues](#langues)).
 - Historique des 50 derniers messages (répéter, précédent, suivant).
+- Clavier et manette : chaque raccourci existe sur les deux, et tous sont réglables.
 
 **Menus et écrans**
 - Menus standard : élément sélectionné, son type (case à cocher, curseur), son état, sa position
@@ -33,8 +34,10 @@ vous prévient par des sons quand le danger approche.
   dans une liste parcourable.
 
 **Autour de vous**
-- L'objet sélectionné par le jeu (l'endroit où l'on paie) est annoncé avec son prix, l'action, ou
-  la raison de son verrouillage.
+- L'objet sélectionné par le jeu (l'endroit où l'on paie) est annoncé avec son niveau (murs, tours,
+  château), son prix, l'action (avec le niveau visé pour une amélioration) et ce qui manque : une
+  condition (technologie de la pierre ou du fer, niveau du château, ermite, moment de la
+  journée...) ou les pièces qui vous manquent. Passer sur un autre objet coupe l'annonce précédente.
 - Au galop (le jeu ne sélectionne alors rien), chaque objet utile que vous croisez est annoncé :
   château, magasins, marchand, montures, statues, énigmes, portails, coffres, arbres de lisière...
 - Entrée et sortie du royaume et des camps de vagabonds ; direction du camp de base à l'arrivée.
@@ -65,8 +68,12 @@ vous prévient par des sons quand le danger approche.
 - Énigmes des Terres du Nord : Heimdall (moment de la journée de chaque pilier, monture requise,
   cor), Thor (symbole actuel de chaque pilier, s'il est juste, combien sont justes), Hel (ce
   qu'attend chaque support), Loki (marche à suivre et risques). Les énigmes résolues sont annoncées.
-- Description des reliques nordiques (marteau de Thor, trophée de Hel, cor de Heimdall, bâton de
-  Loki), de certains artefacts de l'Olympe et de nombreuses montures.
+- Ce que fait chaque relique et artefact (marteau de Thor, trophée de Hel, cor de Heimdall, bâton de
+  Loki, bouclier d'Athéna, bâton d'Hermès, marteau d'Héphaïstos, arc d'Artémis), le pouvoir des
+  monarques des Terres mortes, et la capacité spéciale de chaque monture (avec la touche qui la
+  déclenche).
+- Objets de Call of Olympus : oracle, chantier naval, bornes de frontière, montures à acheter ; noms
+  distincts pour les parties du bateau (épave, construction, départ en mer, bateau).
 - Expédition de la bombe vers la grotte des Greed : chaque étape est annoncée (escorte, entrée,
   traversée, gardien, détonation, sortie), et tant que vous êtes au-delà du portail de la falaise,
   le scanner et le radar ne montrent que cette zone.
@@ -82,8 +89,9 @@ vous prévient par des sons quand le danger approche.
   (pas de source fiable).
 - **Les autres langues du jeu** ont les textes du jeu, mais ceux du mod en anglais tant qu'une
   traduction n'est pas ajoutée.
-- **MelonLoader** n'est pas encore pris en charge (le cœur du mod est indépendant du chargeur,
-  seul l'adaptateur BepInEx existe). La version Mono du jeu n'a pas été testée.
+
+> **Remarque :** toutes les fonctions du mod devraient marcher en multijoueur, sauf peut-être les
+> interactions avec l'autre joueur (sa position, l'achat d'une nouvelle couronne). Ce n'est pas encore testé.
 
 ## Touches
 
@@ -142,12 +150,17 @@ et ne fait jamais bouger le monarque.
 
 ## Installation
 
-1. **BepInEx 6 (IL2CPP).** Le jeu a besoin de BepInEx 6 « bleeding edge » pour IL2CPP, avec les
-   correctifs propres à ce jeu. Suivez l'installation de
-   [abevol/KingdomMod](https://github.com/abevol/KingdomMod#install) (version de BepInEx et
-   correctifs Cpp2IL / Il2CppInterop). Lancez le jeu une fois pour que BepInEx crée ses fichiers.
-2. **Le mod.** Décompressez l'archive de la version dans `Kingdom Two Crowns\BepInEx\plugins`. Vous
-   devez obtenir `BepInEx\plugins\KingdomAccess\` avec `KingdomAccess.BepInEx.dll`,
+1. **BepInEx 6 (IL2CPP) et ses correctifs.** Le jeu a besoin de BepInEx 6 « bleeding edge » pour
+   IL2CPP, plus deux correctifs faits pour ce jeu par [abevol/KingdomMod](https://github.com/abevol/KingdomMod#install)
+   (sans eux, les mises à jour récentes du jeu empêchent BepInEx de fonctionner) :
+   - [BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.753](https://builds.bepinex.dev/projects/bepinex_be/753/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.753%2B0d275a4.zip) : décompressez-le dans le dossier du jeu, de
+     sorte que le dossier `BepInEx` et `winhttp.dll` soient à côté de `KingdomTwoCrowns.exe`.
+   - [Cpp2IL.Patch](https://github.com/abevol/KingdomMod/releases/download/2.4.0/Cpp2IL.Patch.zip) et [Il2CppInterop.Patch](https://github.com/abevol/KingdomMod/releases/download/2.4.3/Il2CppInterop.Patch.zip) : décompressez-les aussi dans le dossier
+     du jeu, en remplaçant les fichiers du même nom.
+
+   Lancez le jeu une fois pour que BepInEx crée ses fichiers (le premier lancement est plus long).
+2. **Le mod.** Décompressez l'archive `KingdomAccess-<version>.zip` dans le dossier du jeu (celui qui
+   contient `KingdomTwoCrowns.exe`). Vous devez obtenir `BepInEx\plugins\KingdomAccess\` avec `KingdomAccess.BepInEx.dll`,
    `KingdomAccess.Core.dll`, `Tolk.dll`, `nvdaControllerClient64.dll` et les dossiers `Lang` et `Sounds`.
 3. **Utilisateurs de NVDA : installez le module complémentaire NVDA** `kingdomAccessKeys` (joint à
    chaque version ; ouvrez le fichier `.nvda-addon` avec NVDA lancé). NVDA coupe normalement la
@@ -164,14 +177,17 @@ et ne fait jamais bouger le monarque.
 raccourci y est documenté (en anglais). Sections :
 
 1. **General** : activation, langue forcée, voix Windows en secours, taille de l'historique.
-2. **Announcements** : objet sélectionné par le jeu, zones du royaume et des camps, textes à
-   l'écran et tutoriel, capacités prêtes.
+2. **Announcements** : objet sélectionné par le jeu, objets croisés au galop, zones du royaume et
+   des camps, textes à l'écran et tutoriel, capacités prêtes.
 3. **Radar and scanner** : portées, limitation à la zone explorée et sa marge, portails détruits.
 4. **Alerts and sounds** : alerte ennemis et sa distance, alerte couronne, moments de la journée, sons.
 5. **Menus** : lecture des menus, journal des menus (développement).
 6. **Keys** : chaque raccourci, par exemple `Wallet = O`, `Radar = V`, `TargetDetails = X`.
    Les noms de touches sont ceux d'Unity (`F5`, `PageDown`, `LeftArrow`...) ; les modificateurs
-   sont `Ctrl`, `Shift`, `Alt`. Une valeur vide désactive le raccourci.
+   sont `Ctrl`, `Shift`, `Alt`. Une valeur vide désactive le raccourci. Les anciennes touches par
+   défaut qui utilisaient Maj sont mises à jour automatiquement.
+7. **Gamepad** : activation de la manette, blocage du jeu pendant qu'un bouton de couche est
+   maintenu, boutons de couche, et chaque raccourci manette (par exemple `PadWallet = RB+A`).
 
 Relancez le jeu après avoir modifié le fichier. Les sons sont des fichiers WAV dans
 `plugins\KingdomAccess\Sounds` : remplacez-en un par votre propre fichier du même nom.
@@ -186,18 +202,11 @@ langue. Pour ajouter une langue : copier `en.json`, traduire les valeurs, vérif
 
 Ces parties fonctionnent en principe mais n'ont pas été confirmées en jeu, ou seulement en partie :
 
-- **Course** automatique (Ctrl+Fin, B, Ctrl+C, Ctrl+flèches) : le mod demande le galop au jeu ;
-  vérifier que le monarque court vraiment, avec chaque monture.
-- Énigme de Heimdall : la monture requise (cheval du jour et de la nuit) est déduite des fichiers du jeu.
-- Énigme de Thor : on ne sait pas ce qui rend les piliers actifs ; le mod les dit « inactifs ».
-- Énigmes de Hel et de Loki : annonces écrites d'après le code du jeu, pas encore jouées de bout en bout.
-- Call of Olympus : énigmes (Cerbère, char), quêtes, bâton d'Hermès, montures.
-- Grotte des Greed : les « portails temporaires » sont supposés être les nids de Greed ; les
-  distances vers l'entrée et le point de détonation peuvent être fausses.
-- Manette : vérifiée seulement à la compilation ; tester chaque raccourci des deux couches avec une vraie manette.
+- Manette : tester chaque raccourci des deux couches avec une vraie manette, et vérifier que le jeu
+  reprend la manette quand LB ou RB est relâché. LB et RB sont supposés inutilisés par le jeu.
 - Annonces au galop : peuvent demander un réglage (trop ou pas assez).
-- Alerte de couronne perdue : vérifier que la couronne portée ne déclenche jamais de fausse alerte.
 - Lecture des textes à l'écran : peut être trop bavarde par endroits (désactivable).
+- Fonctions multijoueur.
 
 Quand quelque chose ne va pas, `Alt+F3` à côté écrit toute l'île dans
 `BepInEx\LogOutput.log` : joignez ce fichier à votre signalement.

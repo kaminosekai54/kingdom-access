@@ -870,5 +870,8 @@
   "key.e": "E",
   "hover.name_level": "{0}, level {1}",
   "act.upgrade_to": "upgrade to level {0}",
-  "hover.missing": "{0} missing"
+  "hover.missing": "{0} missing",
+  "obj.puzzle": "Puzzle",
+  "unitname.beggar": "Vagrant",
+  "steeddesc.reindeer": "Like the stag: faster in forests, lures wild deer."
 }
