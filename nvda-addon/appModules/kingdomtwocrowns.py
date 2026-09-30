@@ -1,12 +1,32 @@
 # Kingdom Access - NVDA app module for Kingdom Two Crowns (KingdomTwoCrowns.exe).
 #
-# NVDA stops speaking whenever a key is pressed. In a game every key press is a game action,
-# so the mod's announcements would be cut all the time. Sleep mode makes NVDA leave the
-# keyboard to the game and not interrupt speech; the Kingdom Access mod keeps speaking through
-# the NVDA controller client. NVDA+Shift+S still toggles sleep mode manually.
+# NVDA normally stops speaking whenever a key is pressed. In a game every key press is a game
+# action, so the Kingdom Access announcements would be cut all the time. While the game has the
+# focus, this module stops key presses from interrupting speech; the mod itself interrupts
+# speech when it has something new to say. Normal NVDA behaviour comes back as soon as another
+# window gets the focus.
+#
+# Sleep mode is NOT used: in sleep mode NVDA also ignores the speech sent by applications,
+# which would silence the mod.
 
 import appModuleHandler
+from keyboardHandler import KeyboardInputGesture
+
+_originalEffect = KeyboardInputGesture.speechEffectWhenExecuted
+
+
+def _noInterrupt(self):
+	return None
 
 
 class AppModule(appModuleHandler.AppModule):
-	sleepMode = True
+
+	def event_appModule_gainFocus(self):
+		KeyboardInputGesture.speechEffectWhenExecuted = property(_noInterrupt)
+
+	def event_appModule_loseFocus(self):
+		KeyboardInputGesture.speechEffectWhenExecuted = _originalEffect
+
+	def terminate(self):
+		KeyboardInputGesture.speechEffectWhenExecuted = _originalEffect
+		super().terminate()
