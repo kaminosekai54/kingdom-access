@@ -15,7 +15,7 @@ namespace KingdomAccess;
 /// </summary>
 public static class AccessMod
 {
-    public const string Version = "0.7.0";
+    public const string Version = "0.8.0";
 
     private static ModContext _ctx;
     private static bool _initialized;
@@ -39,6 +39,7 @@ public static class AccessMod
         BiomeSelectPatches.Log = log;
         TutorialNarrator.Log = log;
         CrownWatcher.Initialize(log);
+        GameInputBlocker.Initialize(log);
         UnitCache.Initialize(log);
         DlcObjects.Initialize(log);
         ApplyAttributePatches(harmony, log);
@@ -69,9 +70,18 @@ public static class AccessMod
     /// <summary>"24 left": distance and side, in the mod language.</summary>
     public static string DistanceSide(float dx) => Directions.DistanceSide(dx);
 
-    /// <summary>Spoken name of the key configured for a shortcut (e.g. "Shift C"), for messages.</summary>
-    public static string KeyName(string shortcut) =>
-        _ctx == null ? "" : HelpList.Spoken(_ctx.Settings.Keys[shortcut]);
+    /// <summary>
+    /// Spoken name of a shortcut for messages (e.g. "Control C"): the gamepad buttons when a pad
+    /// is connected and the shortcut has some, otherwise the keyboard key.
+    /// </summary>
+    public static string KeyName(string shortcut)
+    {
+        if (_ctx == null) return "";
+        var s = _ctx.Settings;
+        var pad = s.Keys.Pad(shortcut);
+        if (s.GamepadEnabled && Gamepad.Connected && pad.Button != PadButton.None) return HelpList.Spoken(pad);
+        return HelpList.Spoken(s.Keys[shortcut]);
+    }
 
     // ---------- Setup ----------
 
@@ -109,6 +119,10 @@ public static class AccessMod
 
             if (!s.Enabled) return;
 
+            // Gamepad: read it, and block the game's own pad input while a mod layer is held.
+            if (s.GamepadEnabled) Gamepad.Poll();
+            GameInputBlocker.Tick(s);
+
             // Menus and screens that exist outside of gameplay.
             HandleGlobalKeys(s);
             MenuNarrator.Tick(s, _ctx.Log, now);
@@ -135,6 +149,7 @@ public static class AccessMod
             if (!ExternalKeyCapture) HandleGameKeys(player, s);
             AutoWalk.Tick(player, now);
             if (s.AnnounceHover) HoverAnnouncer.Tick(player, s, now);
+            if (s.AnnouncePassing) PassingAnnouncer.Tick(player, s, now);
             Zones.Tick(player, s, now, Time.unscaledDeltaTime);
             DayClock.Tick(s, _ctx.Log, now);
             EnemyAlert.Tick(player, s, now);
@@ -169,9 +184,15 @@ public static class AccessMod
         DlcObjects.ResetStates();
         CrownWatcher.Reset();
         CaveNarrator.Reset();
+        PassingAnnouncer.Reset();
+        GameInputBlocker.Release();
     }
 
     // ---------- Shortcuts ----------
+
+    /// <summary>True if the shortcut was pressed on the keyboard or on the gamepad this frame.</summary>
+    private static bool Hit(AccessKeys k, string name) =>
+        k[name].Pressed() || (_ctx.Settings.GamepadEnabled && k.Pad(name).Pressed());
 
     /// <summary>Shortcuts that work everywhere, including menus and outside of gameplay.</summary>
     private static void HandleGlobalKeys(AccessSettings s)
@@ -179,20 +200,20 @@ public static class AccessMod
         var k = s.Keys;
         var p = GameState.Player;
 
-        if (k["RepeatLast"].Pressed()) SpeechOut.RepeatLast();
-        if (k["PreviousMessage"].Pressed()) SpeechOut.Previous();
-        if (k["NextMessage"].Pressed()) SpeechOut.Next();
-        if (k["Help"].Pressed()) HelpList.Show(s);
-        if (k["TutorialHint"].Pressed()) TutorialNarrator.Repeat(p);
+        if (Hit(k, "RepeatLast")) SpeechOut.RepeatLast();
+        if (Hit(k, "PreviousMessage")) SpeechOut.Previous();
+        if (Hit(k, "NextMessage")) SpeechOut.Next();
+        if (Hit(k, "Help")) HelpList.Show(s);
+        if (Hit(k, "TutorialHint")) TutorialNarrator.Repeat(p);
         if (ExternalKeyCapture) return;
 
-        if (k["ReadScreen"].Pressed()) MenuNarrator.ReadScreen();
-        if (k["CaptureScreenText"].Pressed()) ScreenText.Capture();
+        if (Hit(k, "ReadScreen")) MenuNarrator.ReadScreen();
+        if (Hit(k, "CaptureScreenText")) ScreenText.Capture();
 
         // List navigation also works outside of gameplay (island summary, captured texts, help).
-        if (k["RepeatItem"].Pressed()) ListNav.Repeat(p, s);
-        if (k["PreviousItem"].Pressed()) ListNav.Move(p, -1, s);
-        if (k["NextItem"].Pressed()) ListNav.Move(p, 1, s);
+        if (Hit(k, "RepeatItem")) ListNav.Repeat(p, s);
+        if (Hit(k, "PreviousItem")) ListNav.Move(p, -1, s);
+        if (Hit(k, "NextItem")) ListNav.Move(p, 1, s);
     }
 
     /// <summary>Shortcuts that only make sense in gameplay.</summary>
@@ -201,25 +222,25 @@ public static class AccessMod
         var k = s.Keys;
         float now = Time.unscaledTime;
 
-        if (k["Wallet"].Pressed()) Reports.Wallet(player);
-        if (k["Time"].Pressed()) Reports.World();
-        if (k["Mount"].Pressed()) Abilities.MountReport(player);
-        if (k["Abilities"].Pressed()) Abilities.Report(player);
-        if (k["Compass"].Pressed()) Reports.Compass(player);
-        if (k["Census"].Pressed()) Census.Show(player);
-        if (k["Radar"].Pressed()) Radar.Pulse(player, s);
-        if (k["TargetDetails"].Pressed()) Reports.TargetDetails(player, s);
+        if (Hit(k, "Wallet")) Reports.Wallet(player);
+        if (Hit(k, "Time")) Reports.World();
+        if (Hit(k, "Mount")) Abilities.MountReport(player);
+        if (Hit(k, "Abilities")) Abilities.Report(player);
+        if (Hit(k, "Compass")) Reports.Compass(player);
+        if (Hit(k, "Census")) Census.Show(player);
+        if (Hit(k, "Radar")) Radar.Pulse(player, s);
+        if (Hit(k, "TargetDetails")) Reports.TargetDetails(player, s);
 
-        if (k["NextCategory"].Pressed()) CategoryScanner.ChangeCategory(player, 1, s);
-        if (k["PreviousCategory"].Pressed()) CategoryScanner.ChangeCategory(player, -1, s);
-        if (k["WalkToItem"].Pressed()) AutoWalk.Toggle(player, false, now);
-        if (k["RunToItem"].Pressed()) AutoWalk.Toggle(player, true, now);
-        if (k["RunToBase"].Pressed()) AutoWalk.RunToCastle(player, now);
-        if (k["RunToCrown"].Pressed()) AutoWalk.RunToCrown(player, now);
-        if (k["RunBehindLeftWall"].Pressed()) AutoWalk.RunBehindOuterWall(player, false, now);
-        if (k["RunBehindRightWall"].Pressed()) AutoWalk.RunBehindOuterWall(player, true, now);
+        if (Hit(k, "NextCategory")) CategoryScanner.ChangeCategory(player, 1, s);
+        if (Hit(k, "PreviousCategory")) CategoryScanner.ChangeCategory(player, -1, s);
+        if (Hit(k, "WalkToItem")) AutoWalk.Toggle(player, false, now);
+        if (Hit(k, "RunToItem")) AutoWalk.Toggle(player, true, now);
+        if (Hit(k, "RunToBase")) AutoWalk.RunToCastle(player, now);
+        if (Hit(k, "RunToCrown")) AutoWalk.RunToCrown(player, now);
+        if (Hit(k, "RunBehindLeftWall")) AutoWalk.RunBehindOuterWall(player, false, now);
+        if (Hit(k, "RunBehindRightWall")) AutoWalk.RunBehindOuterWall(player, true, now);
 
-        if (k["DumpTarget"].Pressed()) Reports.DumpTarget(player, s, _ctx.Log);
-        if (k["DumpIsland"].Pressed()) Reports.DumpIsland(player, _ctx.Log);
+        if (Hit(k, "DumpTarget")) Reports.DumpTarget(player, s, _ctx.Log);
+        if (Hit(k, "DumpIsland")) Reports.DumpIsland(player, _ctx.Log);
     }
 }

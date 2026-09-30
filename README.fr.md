@@ -7,7 +7,7 @@ vous prévient par des sons quand le danger approche.
 
 *[English version](README.md)*
 
-> État : **bêta (0.7.0)**. Développé et testé par un joueur aveugle avec NVDA sous Windows, sur la
+> État : **bêta (0.8.0)**. Développé et testé par un joueur aveugle avec NVDA sous Windows, sur la
 > version Steam du jeu, surtout dans la campagne des Terres du Nord. Retours et signalements de
 > bugs bienvenus.
 
@@ -35,6 +35,8 @@ vous prévient par des sons quand le danger approche.
 **Autour de vous**
 - L'objet sélectionné par le jeu (l'endroit où l'on paie) est annoncé avec son prix, l'action, ou
   la raison de son verrouillage.
+- Au galop (le jeu ne sélectionne alors rien), chaque objet utile que vous croisez est annoncé :
+  château, magasins, marchand, montures, statues, énigmes, portails, coffres, arbres de lisière...
 - Entrée et sortie du royaume et des camps de vagabonds ; direction du camp de base à l'arrivée.
 - Rapports à la demande : pièces et gemmes, jour, saison, heure et temps avant la nuit, monture,
   relique et capacités (avec ce qu'elles font), boussole et danger, recensement des troupes
@@ -71,7 +73,6 @@ vous prévient par des sons quand le danger approche.
 
 ## Ce que le mod ne fait pas (encore)
 
-- **Clavier uniquement.** Les raccourcis du mod sont au clavier, pas à la manette.
 - **Un seul joueur.** Seul le joueur 1 est suivi. La coopération locale et en ligne n'est pas
   prise en charge, et la fenêtre d'invitation de Steam ne peut être lue par aucun mod.
 - **Écrans pilotés à la souris** qui ne sont pas des menus standard : certains peuvent rester
@@ -86,33 +87,58 @@ vous prévient par des sons quand le danger approche.
 
 ## Touches
 
-Touches par défaut, toutes réglables. Elles évitent celles du jeu : le joueur 1 utilise WASD,
-les flèches et Maj ; le joueur 2 utilise G, H, J, K, L, I et Maj droite (G et J lancent aussi
-l'écran partagé). **F1** en jeu donne la liste de vos raccourcis actuels.
+Touches par défaut, toutes réglables (clavier et manette). Au clavier, elles évitent celles du
+jeu : le joueur 1 utilise WASD, les flèches et Maj (Maj gauche déclenche aussi la capacité de la
+monture, donc aucun raccourci du mod n'utilise Maj) ; le joueur 2 utilise G, H, J, K, L, I et Maj
+droite (G et J lancent aussi l'écran partagé). **F1** en jeu donne la liste de vos raccourcis actuels.
+
+### Clavier
 
 | Touche | Action |
 |---|---|
-| F1 | Aide : liste des raccourcis (Page haut / Page bas pour parcourir) |
-| Maj+F1 | Répéter l'indice du tutoriel en cours |
-| F11 / Maj+F11 / Ctrl+F11 | Répéter le dernier message / précédent / suivant dans l'historique |
+| F1 | Aide : liste des raccourcis, avec leurs boutons de manette |
+| F4 | Répéter l'indice du tutoriel en cours |
+| F11 / F9 / F10 | Répéter le dernier message / précédent / suivant dans l'historique |
 | F2 | Relire l'écran (fenêtre et élément sélectionné ; résumé du blason) |
 | F3 | Mettre tous les textes à l'écran dans une liste |
 | O | Or et gemmes |
 | T | Jour, saison, moment de la journée, temps avant la nuit ou l'aube |
-| M | Monture et fatigue |
+| M | Monture : fatigue, capacité et ce qu'elle fait |
 | R | Relique et capacités, avec ce qu'elles font |
 | C | Boussole : direction, moment de la journée, danger, mur le plus proche |
-| P | Population : recensement des troupes (Page haut / Page bas pour parcourir) |
-| V | Radar (Page haut / Page bas pour parcourir) |
-| Maj+V | Détail de l'objet devant vous |
-| Origine / Maj+Origine | Scanner : catégorie suivante / précédente |
+| P | Population : recensement des troupes |
+| V | Radar |
+| X | Détail de l'objet devant vous |
+| Origine / Ctrl+Origine | Scanner : catégorie suivante / précédente |
 | Page haut / Page bas | Élément précédent / suivant de la dernière liste (scanner, radar, recensement, aide, résumé...) |
-| Ctrl+Origine | Relire l'élément choisi avec sa distance à jour |
-| Fin / Maj+Fin | Marcher / courir vers l'élément choisi (nouvel appui pour arrêter) |
+| E | Relire l'élément choisi avec sa distance à jour |
+| Fin / Ctrl+Fin | Marcher / courir vers l'élément choisi (nouvel appui pour arrêter) |
 | B | Courir à la base (château ou feu de camp) |
-| Maj+C | Courir vers votre couronne perdue |
+| Ctrl+C | Courir vers votre couronne perdue |
 | Ctrl+Gauche / Ctrl+Droite | Courir juste derrière (à l'intérieur) le mur le plus éloigné de ce côté |
-| Maj+F3 / Ctrl+Maj+F3 | Développement : écrire l'objet devant vous / toute l'île dans le journal |
+| Ctrl+F3 / Alt+F3 | Développement : écrire l'objet devant vous / toute l'île dans le journal |
+
+### Manette
+
+Disposition Xbox (PlayStation : A = Croix, B = Rond, X = Carré, Y = Triangle). Toute manette que
+Windows ou Steam Input présente comme une manette Xbox fonctionne. Le mod utilise deux **couches** :
+maintenez **LB** pour la navigation ou **RB** pour les rapports, puis appuyez sur un bouton. Tant
+que LB ou RB est maintenu, le jeu ignore la manette : un raccourci du mod ne lâche jamais de pièce
+et ne fait jamais bouger le monarque.
+
+| LB maintenu + | Action | RB maintenu + | Action |
+|---|---|---|---|
+| Croix haut / bas | Catégorie précédente / suivante | A | Or et gemmes |
+| Croix gauche / droite | Élément précédent / suivant | B | Monture |
+| A | Marcher vers l'élément | X | Heure |
+| RT | Courir vers l'élément | Y | Relique et capacités |
+| LT | Courir à la base | Croix haut | Boussole |
+| X | Relire l'élément | Croix bas | Recensement |
+| Y | Radar | Croix gauche / droite | Derrière le mur de gauche / droite |
+| B | Objet devant vous | Clic du stick droit | Courir vers la couronne perdue |
+| Affichage | Répéter le dernier message | Affichage | Aide |
+| Clic du stick droit | Relire l'écran | Clic du stick gauche | Indice du tutoriel |
+| Clic du stick gauche | Liste des textes à l'écran | LT / RT | Message précédent / suivant |
 
 ## Installation
 
@@ -143,7 +169,7 @@ raccourci y est documenté (en anglais). Sections :
 3. **Radar and scanner** : portées, limitation à la zone explorée et sa marge, portails détruits.
 4. **Alerts and sounds** : alerte ennemis et sa distance, alerte couronne, moments de la journée, sons.
 5. **Menus** : lecture des menus, journal des menus (développement).
-6. **Keys** : chaque raccourci, par exemple `Wallet = O`, `Radar = V`, `TargetDetails = Shift+V`.
+6. **Keys** : chaque raccourci, par exemple `Wallet = O`, `Radar = V`, `TargetDetails = X`.
    Les noms de touches sont ceux d'Unity (`F5`, `PageDown`, `LeftArrow`...) ; les modificateurs
    sont `Ctrl`, `Shift`, `Alt`. Une valeur vide désactive le raccourci.
 
@@ -160,7 +186,7 @@ langue. Pour ajouter une langue : copier `en.json`, traduire les valeurs, vérif
 
 Ces parties fonctionnent en principe mais n'ont pas été confirmées en jeu, ou seulement en partie :
 
-- **Course** automatique (Maj+Fin, B, Maj+C, Ctrl+flèches) : le mod demande le galop au jeu ;
+- **Course** automatique (Ctrl+Fin, B, Ctrl+C, Ctrl+flèches) : le mod demande le galop au jeu ;
   vérifier que le monarque court vraiment, avec chaque monture.
 - Énigme de Heimdall : la monture requise (cheval du jour et de la nuit) est déduite des fichiers du jeu.
 - Énigme de Thor : on ne sait pas ce qui rend les piliers actifs ; le mod les dit « inactifs ».
@@ -168,10 +194,12 @@ Ces parties fonctionnent en principe mais n'ont pas été confirmées en jeu, ou
 - Call of Olympus : énigmes (Cerbère, char), quêtes, bâton d'Hermès, montures.
 - Grotte des Greed : les « portails temporaires » sont supposés être les nids de Greed ; les
   distances vers l'entrée et le point de détonation peuvent être fausses.
+- Manette : vérifiée seulement à la compilation ; tester chaque raccourci des deux couches avec une vraie manette.
+- Annonces au galop : peuvent demander un réglage (trop ou pas assez).
 - Alerte de couronne perdue : vérifier que la couronne portée ne déclenche jamais de fausse alerte.
 - Lecture des textes à l'écran : peut être trop bavarde par endroits (désactivable).
 
-Quand quelque chose ne va pas, `Ctrl+Maj+F3` à côté écrit toute l'île dans
+Quand quelque chose ne va pas, `Alt+F3` à côté écrit toute l'île dans
 `BepInEx\LogOutput.log` : joignez ce fichier à votre signalement.
 
 ## Compiler

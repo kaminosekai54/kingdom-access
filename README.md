@@ -7,7 +7,7 @@ with sounds when danger approaches.
 
 *[Version française](README.fr.md)*
 
-> Status: **beta (0.7.0)**. Developed and tested by a blind player with NVDA on Windows, on the
+> Status: **beta (0.8.0)**. Developed and tested by a blind player with NVDA on Windows, on the
 > Steam version of the game, mostly in the Norse Lands campaign. Feedback and bug reports are welcome.
 
 ---
@@ -49,6 +49,8 @@ with sounds when danger approaches.
 **Around you**
 - The object selected by the game (the point where you can pay) is announced with its price,
   action, or the reason why it is locked.
+- While galloping (the game selects nothing then), every useful object you ride past is announced:
+  castle, shops, merchant, mounts, statues, puzzles, portals, chests, forest-edge trees...
 - Entering and leaving the kingdom and vagrant camps; direction of the base camp when you land.
 - Reports on demand: coins and gems, day / season / time / hours until night, mount, relic and
   abilities (with what they do), compass and danger, troop census (with coins carried).
@@ -82,7 +84,6 @@ with sounds when danger approaches.
 
 ## What it does not do (yet)
 
-- **Keyboard only.** Shortcuts are keyboard keys; there is no gamepad mapping for the mod.
 - **Single player focus.** Only player 1 is followed. Local and online co-op are not supported
   by the mod, and the Steam invite overlay cannot be read by any mod.
 - **Mouse-only screens** that are not standard menus may still be silent. Please report them.
@@ -96,33 +97,57 @@ with sounds when danger approaches.
 
 ## Keys
 
-Defaults, all configurable. They avoid the game's own keys: player 1 uses WASD, the arrows and
-Shift; player 2 uses G, H, J, K, L, I and Right Shift (G and J also start split-screen co-op).
-Press **F1** in game for the list of your current shortcuts.
+Defaults, all configurable (keyboard and gamepad). Keyboard defaults avoid the game's own keys:
+player 1 uses WASD, the arrows and Shift (Left Shift also triggers mount abilities, so no mod
+shortcut uses Shift); player 2 uses G, H, J, K, L, I and Right Shift (G and J also start
+split-screen co-op). Press **F1** in game for the list of your current shortcuts.
+
+### Keyboard
 
 | Key | Action |
 |---|---|
-| F1 | Help: list of all shortcuts (browse with Page Up / Page Down) |
-| Shift+F1 | Repeat the current tutorial hint |
-| F11 / Shift+F11 / Ctrl+F11 | Repeat last message / previous / next in the history |
+| F1 | Help: list of all shortcuts, with their gamepad buttons |
+| F4 | Repeat the current tutorial hint |
+| F11 / F9 / F10 | Repeat last message / previous / next in the history |
 | F2 | Read the current screen (window and selected element; blazon summary) |
 | F3 | Put every on-screen text in a browsable list |
 | O | Coins and gems ("or" = gold) |
 | T | Day, season, time of day, hours until night or dawn |
-| M | Mount and whether it is tired |
+| M | Mount: tired or not, its ability and what it does |
 | R | Relic and abilities, with what they do |
 | C | Compass: facing, time of day, danger, nearest wall |
-| P | Population: troop census (browse with Page Up / Page Down) |
-| V | Radar (browse with Page Up / Page Down) |
-| Shift+V | Details of the object in front of you |
-| Home / Shift+Home | Scanner: next / previous category |
+| P | Population: troop census |
+| V | Radar |
+| X | Details of the object in front of you |
+| Home / Ctrl+Home | Scanner: next / previous category |
 | Page Up / Page Down | Previous / next item of the last list (scanner, radar, census, help, summary...) |
-| Ctrl+Home | Reread the selected item with its current distance |
-| End / Shift+End | Walk / run to the selected item (press again to stop) |
+| E | Reread the selected item with its current distance |
+| End / Ctrl+End | Walk / run to the selected item (press again to stop) |
 | B | Run to the base (castle or campfire) |
-| Shift+C | Run to your lost crown |
+| Ctrl+C | Run to your lost crown |
 | Ctrl+Left / Ctrl+Right | Run just behind (inside) the farthest wall on that side |
-| Shift+F3 / Ctrl+Shift+F3 | Development: write the object in front of you / the whole island to the log |
+| Ctrl+F3 / Alt+F3 | Development: write the object in front of you / the whole island to the log |
+
+### Gamepad
+
+Xbox layout (PlayStation: A = Cross, B = Circle, X = Square, Y = Triangle). Any pad that Windows
+or Steam Input presents as an Xbox pad works. The mod uses two **layers**: hold **LB** for
+navigation or **RB** for reports, then press a button. While LB or RB is held, the game ignores
+the pad, so a mod shortcut never drops a coin or moves the monarch.
+
+| Hold LB + | Action | Hold RB + | Action |
+|---|---|---|---|
+| D-pad up / down | Previous / next category | A | Coins and gems |
+| D-pad left / right | Previous / next item | B | Mount |
+| A | Walk to the item | X | Time |
+| RT | Run to the item | Y | Relic and abilities |
+| LT | Run to the base | D-pad up | Compass |
+| X | Reread the item | D-pad down | Census |
+| Y | Radar | D-pad left / right | Behind the left / right wall |
+| B | Object in front of you | RS (click) | Run to the lost crown |
+| View | Repeat last message | View | Help |
+| RS (click) | Read the screen | LS (click) | Tutorial hint |
+| LS (click) | Screen texts list | LT / RT | Previous / next message |
 
 ## Installation
 
@@ -152,7 +177,7 @@ shortcut is documented in the file. Sections:
 3. **Radar and scanner**: ranges, explored-area-only mode and its margin, destroyed portals.
 4. **Alerts and sounds**: enemy alert and its distance, crown alert, day phases, sounds.
 5. **Menus**: menu narration, menu logging (development).
-6. **Keys**: every shortcut, e.g. `Wallet = O`, `Radar = V`, `TargetDetails = Shift+V`. Key names
+6. **Keys**: every shortcut, e.g. `Wallet = O`, `Radar = V`, `TargetDetails = X`. Key names
    are Unity key names (`F5`, `PageDown`, `LeftArrow`...); modifiers are `Ctrl`, `Shift`, `Alt`.
    Leave a value empty to disable a shortcut.
 
@@ -169,7 +194,7 @@ Adding a language means copying `en.json`, translating the values, and checking 
 
 These parts work in principle but have not been confirmed in game, or only partly:
 
-- Auto-**run** (Shift+End, B, Shift+C, Ctrl+arrows): the mod asks the game to gallop; confirm the
+- Auto-**run** (Ctrl+End, B, Ctrl+C, Ctrl+arrows): the mod asks the game to gallop; confirm the
   monarch really runs with every mount.
 - Heimdall puzzle: the mount requirement (day-night horse) is deduced from game files.
 - Thor puzzle: what makes the pillars active is unknown; the mod reports "inactive".
@@ -177,10 +202,12 @@ These parts work in principle but have not been confirmed in game, or only partl
 - Call of Olympus: puzzles (Cerberus, Chariot), quests, Hermes staff, mounts.
 - Greed cave: "temporary portals" are assumed to be the Greed nests; the distances to the cave
   entrance and detonation point may be wrong.
+- Gamepad: tested only by building; check every layer shortcut with a real pad.
+- Announcements while galloping: may need tuning (too many or too few).
 - Lost crown alert: make sure the worn crown never triggers a false alert.
 - On-screen text reading: may be too talkative in some places (can be turned off).
 
-When something is wrong, `Ctrl+Shift+F3` next to it writes the whole island to
+When something is wrong, `Alt+F3` next to it writes the whole island to
 `BepInEx\LogOutput.log`: attach that file to your report.
 
 ## Building from source

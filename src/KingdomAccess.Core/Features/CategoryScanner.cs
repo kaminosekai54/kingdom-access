@@ -260,7 +260,7 @@ internal static class CategoryScanner
     /// at the edge of the forest facing the kingdom, i.e. close to the kingdom border on its side
     /// (trees deeper in the forest cannot be cut until the ones in front of them are gone).
     /// </summary>
-    private static bool IsCuttable(Payable p)
+    internal static bool IsCuttable(Payable p)
     {
         try
         {

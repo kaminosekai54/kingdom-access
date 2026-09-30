@@ -192,7 +192,7 @@ internal static class DlcObjects
         {
             string raw = st.Sign != null ? st.Sign.name : null;
             if (string.IsNullOrEmpty(raw)) return null;
-            if (LoggedRunes.Add(raw)) _log?.Info($"[DLC] Symbole de pilier de Thor : {raw}");
+            if (LoggedRunes.Add(raw)) _log?.Info($"[DLC] Thor pillar rune: {raw}");
             return Loc.TryT("rune." + System.Text.RegularExpressions.Regex.Replace(raw.ToLowerInvariant(), "[^a-z0-9]", "")) ?? null;
         }
         catch { return null; }

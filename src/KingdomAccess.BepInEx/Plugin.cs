@@ -54,6 +54,8 @@ public class Plugin : BasePlugin
         const string ann = "2. Announcements";
         s.AnnounceHover = cfg.Bind(ann, "AnnounceHover", d.AnnounceHover,
             "Announce the object selected by the game (the point where you can pay).").Value;
+        s.AnnouncePassing = cfg.Bind(ann, "AnnouncePassing", d.AnnouncePassing,
+            "While galloping (the game selects nothing then), announce the useful objects you ride past.").Value;
         s.HoverRange = cfg.Bind(ann, "HoverRange", d.HoverRange,
             "Range of the 'details of the object in front of you' shortcut.").Value;
         s.AnnounceCastleZone = cfg.Bind(ann, "AnnounceCastleZone", d.AnnounceCastleZone,
@@ -91,9 +93,31 @@ public class Plugin : BasePlugin
         const string keys = "6. Keys";
         foreach (var def in AccessKeys.Definitions)
         {
-            string text = cfg.Bind(keys, def.Name, def.Default,
-                def.Description + " Examples: O, Shift+V, Ctrl+F11, PageDown. Empty = disabled.").Value;
-            s.Keys.Set(def.Name, text, log);
+            var entry = cfg.Bind(keys, def.Name, def.Default,
+                def.Description + " Examples: O, Ctrl+Home, F9, PageDown. Empty = disabled.");
+            // Shortcuts that used Shift (Left Shift triggers mount abilities) moved to new
+            // defaults: update config files that still hold the old default.
+            if (def.OldDefault != null && entry.Value == def.OldDefault) entry.Value = def.Default;
+            s.Keys.Set(def.Name, entry.Value, log);
+        }
+
+        const string pad = "7. Gamepad";
+        s.GamepadEnabled = cfg.Bind(pad, "GamepadEnabled", d.GamepadEnabled,
+            "Use the gamepad (Xbox pads, or any pad Steam Input presents as one) for the mod shortcuts.").Value;
+        s.GamepadBlockGame = cfg.Bind(pad, "BlockGameWhileLayerHeld", d.GamepadBlockGame,
+            "While a layer button is held, the game ignores the pad, so mod shortcuts never drop a coin or move the monarch.").Value;
+        string layers = cfg.Bind(pad, "LayerButtons", "LB,RB",
+            "Buttons that open a layer of mod shortcuts while held (comma separated).").Value;
+        var layerList = new System.Collections.Generic.List<PadButton>();
+        foreach (string part in layers.Split(','))
+            if (Enum.TryParse(part.Trim(), true, out PadButton b) && b != PadButton.None) layerList.Add(b);
+        s.GamepadLayerButtons = layerList.ToArray();
+        foreach (var def in AccessKeys.Definitions)
+        {
+            string text = cfg.Bind(pad, "Pad" + def.Name, def.Pad,
+                def.Description + " Buttons: A, B, X, Y, LB, RB, LT, RT, Back, Start, LS, RS, DpadUp, DpadDown, DpadLeft, DpadRight. " +
+                "Hold the first buttons, press the last one (e.g. LB+DpadRight). Empty = disabled.").Value;
+            s.Keys.SetPad(def.Name, text, log);
         }
         return s;
     }

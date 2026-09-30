@@ -39,11 +39,11 @@ public static class Loc
                 }
                 catch (Exception ex)
                 {
-                    log.Error($"[Langue] Fichier illisible {file} : {ex.Message}");
+                    log.Error($"[Language] Unreadable file {file}: {ex.Message}");
                 }
             }
         }
-        log.Info($"[Langue] Langues disponibles : {string.Join(", ", Tables.Keys)}");
+        log.Info($"[Language] Available languages: {string.Join(", ", Tables.Keys)}");
         Tables.TryGetValue(Fallback, out _fallback);
         _fallback ??= new Dictionary<string, string>();
         Apply(_override.Length > 0 ? _override : Fallback);
@@ -107,7 +107,7 @@ public static class Loc
                 if (!Tables.TryGetValue(code, out var table)) Tables[code] = table = new Dictionary<string, string>();
                 foreach (var kv in extra) table[kv.Key] = kv.Value;
             }
-            catch (Exception ex) { _log?.Error($"[Langue] Fichier illisible {file} : {ex.Message}"); }
+            catch (Exception ex) { _log?.Error($"[Language] Unreadable file {file}: {ex.Message}"); }
         }
         Tables.TryGetValue(Fallback, out _fallback);
         _fallback ??= new Dictionary<string, string>();

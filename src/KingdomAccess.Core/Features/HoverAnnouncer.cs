@@ -34,8 +34,6 @@ internal static class HoverAnnouncer
     public static void Tick(Player player, AccessSettings s, float now)
     {
         Payable target = Selected(player);
-        // While galloping the game selects nothing: announce what the player rides past.
-        if (target == null && IsRunning(player)) target = Passing(player);
         if (target == null)
         {
             _candidate = null;
@@ -71,33 +69,6 @@ internal static class HoverAnnouncer
             _lastSpokenAt = now;
         }
         _last = target;
-    }
-
-    private static bool IsRunning(Player player)
-    {
-        try { return player.isRunning || player.actionState == Player.ActionState.Run; }
-        catch { return false; }
-    }
-
-    private const float PassingRange = 1.5f;
-    private static float _nextPassingScan;
-    private static Payable _passingCache;
-
-    /// <summary>
-    /// Nearest available payable within a short range, used while galloping (searched ten times
-    /// per second). Trees, bushes and fields are skipped so that riding through a forest does
-    /// not flood the speech.
-    /// </summary>
-    private static Payable Passing(Player player)
-    {
-        if (Time.unscaledTime < _nextPassingScan) return _passingCache;
-        _nextPassingScan = Time.unscaledTime + 0.1f;
-        _passingCache = null;
-        var p = SelectedOrClosest(player, PassingRange);
-        if (p == null) return null;
-        var kind = ObjectNames.Identify(p).Kind;
-        _passingCache = kind is ObjKind.Tree or ObjKind.Bush or ObjKind.Farmland ? null : p;
-        return _passingCache;
     }
 
     /// <summary>Object selected by the game for interaction, or null.</summary>
@@ -177,7 +148,7 @@ internal static class HoverAnnouncer
         return text;
     }
 
-    private static string DescribeCore(Player player, Payable p)
+    internal static string DescribeCore(Player player, Payable p)
     {
         var a = Analyze(player, p);
         if (!string.IsNullOrEmpty(a.LockText)) return $"{a.Name}, {a.LockText}";
