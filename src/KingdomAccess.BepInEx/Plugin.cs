@@ -83,6 +83,10 @@ public class Plugin : BasePlugin
         s.CrownAlert = cfg.Bind(alerts, "CrownAlert", d.CrownAlert, "Alert when your crown is on the ground or carried away.").Value;
         s.AnnounceDayPhases = cfg.Bind(alerts, "AnnounceDayPhases", d.AnnounceDayPhases,
             "Sound and speech at dawn, day, evening and night.").Value;
+        s.CaveBeacon = cfg.Bind(alerts, "CaveBeacon", d.CaveBeacon,
+            "Inside the Greed cave, a heartbeat guides you to the bomb's detonation point (faster and louder when closer, on the side of the point).").Value;
+        s.PaySound = cfg.Bind(alerts, "PaySound", d.PaySound,
+            "Short chime when the object in front of you can be paid right now.").Value;
         s.SoundsEnabled = cfg.Bind(alerts, "SoundsEnabled", d.SoundsEnabled,
             "Mod sounds (Sounds folder; replace a WAV file with your own, keeping its name).").Value;
 

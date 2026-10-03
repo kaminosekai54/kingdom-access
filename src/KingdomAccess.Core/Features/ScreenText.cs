@@ -34,6 +34,8 @@ internal static class ScreenText
 
     public static void Tick(AccessSettings s, float now)
     {
+        // The Olympus map panel texts are read by the map narrator; F3 still lists them.
+        if (MapNarrator.GreekMapOpen) return;
         if (!s.AnnounceScreenText || now < _nextScan) return;
         _nextScan = now + ScanInterval;
 

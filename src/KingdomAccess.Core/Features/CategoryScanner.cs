@@ -207,7 +207,7 @@ internal static class CategoryScanner
                     if (boat == null || !boat.gameObject.activeInHierarchy) continue;
                     if (boat.gameObject.name.ToLowerInvariant().Contains("wreck")) continue; // wreck not repaired yet
                     var pay = boat.GetComponent<Payable>();
-                    AddItem(boat, Loc.T("obj.boat"), pay != null && GameState.IsAvailable(pay));
+                    AddItem(boat, ObjectNames.Identify(boat).Name, pay != null && GameState.IsAvailable(pay));
                 }
                 break;
             case ScanCategory.Walls:

@@ -15,7 +15,7 @@ namespace KingdomAccess;
 /// </summary>
 public static class AccessMod
 {
-    public const string Version = "0.9.0";
+    public const string Version = "0.10.0";
 
     private static ModContext _ctx;
     private static bool _initialized;
@@ -35,11 +35,16 @@ public static class AccessMod
         SpeechOut.Configure(ctx.Settings.HistorySize);
         ScreenReader.Initialize(ctx.ModDirectory, ctx.Settings.SapiFallback, log);
         Sounds.Initialize(ctx.ModDirectory, ctx.Settings.SoundsEnabled);
+        GameAudio.Enabled = ctx.Settings.SoundsEnabled;
         GameState.SetLog(log);
         BiomeSelectPatches.Log = log;
         TutorialNarrator.Log = log;
+        MapNarrator.Log = log;
+        ObjectNames.Log = log;
+        CaveNarrator.Log = log;
         CrownWatcher.Initialize(log);
         GameInputBlocker.Initialize(log);
+        StartupNarrator.Initialize(log);
         UnitCache.Initialize(log);
         DlcObjects.Initialize(log);
         ApplyAttributePatches(harmony, log);
@@ -118,6 +123,7 @@ public static class AccessMod
             }
 
             if (!s.Enabled) return;
+            StartupNarrator.Tick(now);
 
             // Gamepad: read it, and block the game's own pad input while a mod layer is held.
             if (s.GamepadEnabled) Gamepad.Poll();
@@ -126,6 +132,8 @@ public static class AccessMod
             // Menus and screens that exist outside of gameplay.
             HandleGlobalKeys(s);
             MenuNarrator.Tick(s, _ctx.Log, now);
+            DlcPopupNarrator.Tick(now);
+            DlcPopupNarrator.TickPeaceful(now);
             if (s.MenuNarration)
             {
                 MapNarrator.Tick(now);
@@ -158,6 +166,7 @@ public static class AccessMod
             DlcObjects.Tick(now);
             if (s.CrownAlert) CrownWatcher.Tick(player, now);
             CaveNarrator.Tick(player, now);
+            if (s.CaveBeacon) CaveNarrator.BeaconTick(player, now);
         }
         catch (Exception ex)
         {

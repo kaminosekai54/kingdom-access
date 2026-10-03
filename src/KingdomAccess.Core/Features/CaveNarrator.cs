@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using KingdomAccess.Game;
 using KingdomAccess.Localization;
+using KingdomAccess.Speech;
 using UnityEngine;
 using SpeechOut = KingdomAccess.Speech.Speech;
 
@@ -44,7 +45,8 @@ internal static class CaveNarrator
             {
                 if (cps == null) continue;
                 var st = cps._state;
-                if (States.TryGetValue(cps.Pointer, out var before) && before != st)
+                if (!States.TryGetValue(cps.Pointer, out var before) || before != st) LogStage(player, st.ToString());
+                if (States.TryGetValue(cps.Pointer, out before) && before != st)
                 {
                     string text = Loc.TryT("cave.state." + st.ToString().ToLowerInvariant());
                     if (text != null) SpeechOut.Say(text, true);
@@ -84,31 +86,111 @@ internal static class CaveNarrator
         _beyond = beyond;
     }
 
-    /// <summary>Bomb details: key points of the expedition, from the player.</summary>
+    // ---------- Bomb beacon ----------
+
+    internal static IModLog Log { set => _log = value; }
+    private static IModLog _log;
+
+    /// <summary>Expedition stages during which the bomb is inside the cave.</summary>
+    private static readonly System.Collections.Generic.HashSet<string> CaveStages = new()
+    {
+        "CaveEntrance", "GoingInsideCave", "TraversingCave", "FightingBoss", "WaitingForLight"
+    };
+
+    private static float? _targetX;
+    private static float _nextBeat, _nextTarget;
+    private static bool _reachedSaid;
+
+    private static bool InStage(System.Func<string, bool> test)
+    {
+        foreach (var st in States.Values)
+            if (test(st.ToString())) return true;
+        return false;
+    }
+
+    /// <summary>The expedition bomb (nearest to x), or null.</summary>
+    private static Bomb FindBomb(float x)
+    {
+        Bomb best = null;
+        float bestD = float.MaxValue;
+        try
+        {
+            foreach (var b in Object.FindObjectsByType<Bomb>(FindObjectsSortMode.None))
+            {
+                if (b == null || !b.gameObject.activeInHierarchy) continue;
+                float d = Mathf.Abs(b.transform.position.x - x);
+                if (d < bestD) { bestD = d; best = b; }
+            }
+        }
+        catch { }
+        return best;
+    }
+
+    /// <summary>
+    /// True when the bomb waits for the player to light its fuse (the game's "waiting for light"
+    /// stage): paying then lights it.
+    /// </summary>
+    public static bool BombAtDetonation(GameObject bombGo) => InStage(s => s == "WaitingForLight");
+
+    /// <summary>
+    /// Inside the cave, a heartbeat guides the player to the bomb, where they have to act: faster
+    /// and louder when closer, in the ear of the side where it is. Called every frame.
+    /// </summary>
+    public static void BeaconTick(Player player, float now)
+    {
+        if (now >= _nextTarget)
+        {
+            _nextTarget = now + 0.25f;
+            _targetX = null;
+            if (InStage(s => CaveStages.Contains(s)))
+            {
+                var bomb = FindBomb(GameState.PlayerX(player));
+                if (bomb != null) _targetX = bomb.transform.position.x;
+            }
+        }
+        if (_targetX == null) { _reachedSaid = false; return; }
+
+        float dx = _targetX.Value - GameState.PlayerX(player);
+        float d = Mathf.Abs(dx);
+        if (d < 2f && !_reachedSaid) { _reachedSaid = true; SpeechOut.Say(Loc.T("cave.bomb_here"), false); }
+        else if (d > 5f) _reachedSaid = false;
+
+        if (now < _nextBeat) return;
+        float closeness = Mathf.Clamp01(1f - d / 60f);
+        _nextBeat = now + Mathf.Lerp(1.6f, 0.35f, closeness);
+        float pan = d < 1.5f ? 0f : Mathf.Sign(dx) * Mathf.Clamp01(d / 12f);
+        GameAudio.Heartbeat(Mathf.Lerp(0.25f, 1f, closeness), pan);
+    }
+
+    /// <summary>Diagnostics: positions and the game's raw bomb points at each expedition stage.</summary>
+    private static void LogStage(Player player, string stage)
+    {
+        try
+        {
+            float px = GameState.PlayerX(player);
+            var bomb = FindBomb(px);
+            string bombX = bomb != null ? bomb.transform.position.x.ToString("0.0") : "none";
+            var sb = new System.Text.StringBuilder();
+            foreach (var bp in Object.FindObjectsByType<BombablePortal>(FindObjectsSortMode.None))
+                if (bp != null)
+                    sb.Append($" | portal x={bp.transform.position.x:0.0} wait={bp.bombWaitPosition:0.0} enter={bp.bombEnterPosition:0.0} detonate={bp.bombDetonatesPosition:0.0}");
+            _log?.Info($"[Cave] stage {stage}: player x={px:0.0}, bomb x={bombX}, cliff x={(_hasCliff ? _cliffX.ToString("0.0") : "?")}, beyond cliff={_beyond}{sb}");
+        }
+        catch { }
+    }
+
+    /// <summary>Bomb details: where the bomb is now, then where the cliff portal is, from the player.</summary>
     public static string BombDetails(Player player, GameObject bombGo)
     {
         try
         {
-            var bomb = bombGo.GetComponent<Bomb>();
-            if (bomb == null || player == null) return null;
+            if (player == null) return null;
             float px = GameState.PlayerX(player);
-            BombablePortal best = null;
-            float bestD = float.MaxValue;
-            foreach (var bp in Object.FindObjectsByType<BombablePortal>(FindObjectsSortMode.None))
+            var parts = new System.Collections.Generic.List<string>
             {
-                if (bp == null) continue;
-                float d = Mathf.Abs(bp.transform.position.x - bombGo.transform.position.x);
-                if (d < bestD) { bestD = d; best = bp; }
-            }
-            if (best == null) return null;
-            float bx = best.transform.position.x;
-            // Absolute position, or relative to the portal if the value is small and the portal far away.
-            float Abs(float v) => Mathf.Abs(v) < 60f && Mathf.Abs(bx) > 100f ? bx + v : v;
-            var parts = new List<string>
-            {
-                Loc.T("cave.point.enter", Directions.DistanceSide(Abs(best.bombEnterPosition) - px)),
-                Loc.T("cave.point.detonate", Directions.DistanceSide(Abs(best.bombDetonatesPosition) - px))
+                Loc.T("cave.point.bomb", Directions.DistanceSide(bombGo.transform.position.x - px))
             };
+            if (_hasCliff) parts.Add(Loc.T("cave.point.portal", Directions.DistanceSide(_cliffX - px)));
             return string.Join(", ", parts);
         }
         catch { return null; }

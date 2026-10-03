@@ -7,7 +7,7 @@ vous prévient par des sons quand le danger approche.
 
 *[English version](README.md)*
 
-> État : **bêta (0.9.0)**. Développé et testé par un joueur aveugle avec NVDA sous Windows, sur la
+> État : **bêta (0.10.0)**. Développé et testé par un joueur aveugle avec NVDA sous Windows, sur la
 > version Steam du jeu, surtout dans la campagne des Terres du Nord. Retours et signalements de
 > bugs bienvenus.
 
@@ -19,14 +19,16 @@ vous prévient par des sons quand le danger approche.
 - Parle à travers votre lecteur d'écran grâce à Tolk (NVDA, JAWS, SuperNova, ZoomText...), avec
   la voix Windows en secours. Le braille passe par votre lecteur d'écran.
 - Suit automatiquement la langue du jeu, y compris quand vous la changez dans les options.
-  Français et anglais inclus ; les autres langues retombent sur l'anglais (voir [Langues](#langues)).
+  Les 11 langues du jeu sont incluses : anglais, français, allemand, espagnol, italien, portugais,
+  russe, japonais, coréen, chinois simplifié et traditionnel (voir [Langues](#langues)).
 - Historique des 50 derniers messages (répéter, précédent, suivant).
 - Clavier et manette : chaque raccourci existe sur les deux, et tous sont réglables.
 
 **Menus et écrans**
 - Menus standard : élément sélectionné, son type (case à cocher, curseur), son état, sa position
   (« 2 sur 5 ») et le texte des fenêtres qui s'ouvrent. Les boutons sans texte ont un nom.
-- Écran de nouvelle partie (monde, difficulté, monarque), carte et chronologie, éditeur de blason
+- Écran de nouvelle partie (monde, difficulté, monarque), carte et chronologie (y compris la carte du
+  monde de Call of Olympus : oracle, temples, îles de quête, mont Olympe, et ce qui les débloque), éditeur de blason
   (description de chaque fond et emblème, noms des couleurs), résumé de fin d'île (lu en entier,
   puis parcourable ligne par ligne).
 - Tutoriel : les indices du fantôme sont annoncés (action attendue et position du fantôme).
@@ -62,6 +64,7 @@ vous prévient par des sons quand le danger approche.
 - Couronne perdue : alerte avec sa position, répétée jusqu'à ce que vous la récupériez ; une
   touche vous y fait courir.
 - Aube, jour, soir et nuit : un son et une annonce.
+- Un petit carillon quand l'objet devant vous peut être payé tout de suite.
 - Retour d'une capacité (objet de pouvoir, monarque, monture).
 
 **Contenu des DLC**
@@ -76,7 +79,9 @@ vous prévient par des sons quand le danger approche.
   distincts pour les parties du bateau (épave, construction, départ en mer, bateau).
 - Expédition de la bombe vers la grotte des Greed : chaque étape est annoncée (escorte, entrée,
   traversée, gardien, détonation, sortie), et tant que vous êtes au-delà du portail de la falaise,
-  le scanner et le radar ne montrent que cette zone.
+  le scanner et le radar ne montrent que cette zone. Dans la grotte, un battement de cœur vous guide
+  vers la bombe, là où vous devez agir : plus rapide et plus fort en approchant, du côté où elle se
+  trouve. La description de la bombe donne sa position actuelle, puis celle du portail de la falaise.
 
 ## Ce que le mod ne fait pas (encore)
 
@@ -87,8 +92,6 @@ vous prévient par des sons quand le danger approche.
 - **L'Olympe (Call of Olympus)** n'est que partiellement couvert : ses énigmes et quêtes n'ont pas
   encore été testées, et plusieurs descriptions d'artefacts et de montures manquent volontairement
   (pas de source fiable).
-- **Les autres langues du jeu** ont les textes du jeu, mais ceux du mod en anglais tant qu'une
-  traduction n'est pas ajoutée.
 
 > **Remarque :** toutes les fonctions du mod devraient marcher en multijoueur, sauf peut-être les
 > interactions avec l'autre joueur (sa position, l'achat d'une nouvelle couronne). Ce n'est pas encore testé.
@@ -194,6 +197,8 @@ Relancez le jeu après avoir modifié le fichier. Les sons sont des fichiers WAV
 
 ## Langues
 
+Le français et l'anglais ont été écrits à la main ; les autres langues ont été traduites avec l'aide
+d'une IA et n'ont pas encore été relues par des locuteurs natifs : toute correction est la bienvenue.
 Les textes du mod sont dans [`Localization/`](Localization/README.md), un fichier JSON par
 langue. Pour ajouter une langue : copier `en.json`, traduire les valeurs, vérifier avec
 `python tools/check_localization.py`. Voir le [guide de traduction](Localization/README.md).
@@ -207,6 +212,8 @@ Ces parties fonctionnent en principe mais n'ont pas été confirmées en jeu, ou
 - Annonces au galop : peuvent demander un réglage (trop ou pas assez).
 - Lecture des textes à l'écran : peut être trop bavarde par endroits (désactivable).
 - Fonctions multijoueur.
+- Battement de cœur de la grotte : il fonctionne, mais il n'est pas encore assez distinct, présent
+  ni régulier ; il sera retravaillé (désactivable avec `CaveBeacon = false`).
 
 Quand quelque chose ne va pas, `Alt+F3` à côté écrit toute l'île dans
 `BepInEx\LogOutput.log` : joignez ce fichier à votre signalement.

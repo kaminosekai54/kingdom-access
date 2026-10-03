@@ -25,8 +25,24 @@ internal static class MapNarrator
     private static bool _wasOpen;
     private static string _lastGreekView;
     private static GameObject _lastGreekButton;
-    /// <summary>True right after the view changed: the next island waits for the view announcement.</summary>
-    private static bool _queueNext;
+    private static GameObject _lastLoggedSelection;
+    internal static IModLog Log { set => _log = value; }
+    private static IModLog _log;
+
+    /// <summary>Development aid: writes each element selected on the Olympus map to the log.</summary>
+    private static void LogSelection()
+    {
+        try
+        {
+            var go = EventSystem.current != null ? EventSystem.current.currentSelectedGameObject : null;
+            if (go == null || go == _lastLoggedSelection) return;
+            _lastLoggedSelection = go;
+            string path = go.name;
+            for (var t = go.transform.parent; t != null; t = t.parent) path = t.name + "/" + path;
+            _log?.Info($"[Map] Olympus map selection: {path} (view {_greece._openWorldMapState}, focused land {_greece.focusedLand})");
+        }
+        catch { }
+    }
 
     public static void Tick(float now)
     {
@@ -35,6 +51,7 @@ internal static class MapNarrator
             _nextLookup = now + 1f;
             FindMenu();
         }
+        if (_greece == null) GreekMapOpen = false;
         if (_menu == null) return;
 
         try
@@ -100,41 +117,64 @@ internal static class MapNarrator
 
     // ---------- Olympus map ----------
 
+    private const float ViewSettle = 0.6f;
+    private const float LandSettle = 0.15f;
+    private static string _pendingView;
+    private static float _pendingViewSince;
+    private static int _pendingLand = -1;
+    private static float _pendingLandSince;
+
+    /// <summary>True while the Olympus map is open (on-screen text reading pauses meanwhile).</summary>
+    public static bool GreekMapOpen { get; private set; }
+
+    /// <summary>True while the classic map or the Olympus map is open.</summary>
+    public static bool AnyMapOpen => GreekMapOpen || _wasOpen;
+
+    /// <summary>
+    /// Olympus map. In the island view, left and right change island, and the game briefly goes
+    /// back through the world view at each change: view changes are only announced once they
+    /// last, and the island is announced whenever the focused island changes, in either view.
+    /// </summary>
     private static void TickGreece()
     {
+        float now = Time.unscaledTime;
         if (!_greece.isActiveAndEnabled)
         {
+            GreekMapOpen = false;
             _wasOpen = false; _lastLand = -1; _lastGreekView = null; _lastGreekButton = null;
+            _pendingView = null; _pendingLand = -1;
             return;
         }
+        GreekMapOpen = true;
+        LogSelection();
+
+        // View: announce it only when it stays the same for a moment.
         string view = _greece._openWorldMapState.ToString();
-        if (view != _lastGreekView)
+        if (view != _pendingView) { _pendingView = view; _pendingViewSince = now; }
+        else if (view != _lastGreekView && now - _pendingViewSince >= ViewSettle)
         {
+            bool first = _lastGreekView == null;
             _lastGreekView = view;
-            _lastLand = -1;
-            _lastGreekButton = null;
-            SpeechOut.Say(Loc.T(view == "ShowingWorld" ? "map.greece.world" : "map.greece.island"), true);
-            _queueNext = true;
+            _log?.Info($"[Map] Olympus map view: {view}, focused land {_greece.focusedLand}");
+            // The first time the map opens, the island announcement follows the view announcement.
+            SpeechOut.Say(Loc.T(view == "ShowingWorld" ? "map.greece.world" : "map.greece.island"), !first);
         }
 
-        if (view == "ShowingWorld")
+        // Island: the focused island, or in the world view the selected island button.
+        int land = _greece.focusedLand;
+        var go = EventSystem.current != null ? EventSystem.current.currentSelectedGameObject : null;
+        if (view == "ShowingWorld" && go != null && go != _lastGreekButton && IsGreekLandButton(go))
         {
-            // World view: the selected island button.
-            var go = EventSystem.current != null ? EventSystem.current.currentSelectedGameObject : null;
-            if (go == null || go == _lastGreekButton || !IsGreekLandButton(go)) return;
             _lastGreekButton = go;
-            SpeechOut.Say(DescribeGreekButton(go), !_queueNext);
-            _queueNext = false;
+            int fromButton = LandForGreekButton(go.GetComponent<UIMainMapLand>());
+            if (fromButton >= 0) land = fromButton;
         }
-        else
-        {
-            // Single-island view: left and right scroll through the islands.
-            int land = _greece.focusedLand;
-            if (land == _lastLand) return;
-            _lastLand = land;
-            SpeechOut.Say(DescribeLand(land, GreekButtonForLand(land)), !_queueNext);
-            _queueNext = false;
-        }
+        if (land != _pendingLand) { _pendingLand = land; _pendingLandSince = now; return; }
+        if (land == _lastLand || now - _pendingLandSince < LandSettle) return;
+        _lastLand = land;
+        var button = GreekButtonForLand(land);
+        string text = button != null ? DescribeGreekButton(button) : DescribeLand(land, null);
+        SpeechOut.Say(text, _lastGreekView != null);
     }
 
     /// <summary>True for the island buttons of the Olympus world map (announced by this class).</summary>

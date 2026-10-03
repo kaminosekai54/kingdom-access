@@ -359,6 +359,9 @@ internal static class MenuNarrator
                       || Input.GetKeyDown(KeyCode.Tab);
         if (!navKey) return;
         if (AccessMod.ExternalKeyCapture) return;
+        // The map screens handle the arrows themselves with nothing selected: selecting an
+        // element there would move the keyboard into the pause menu behind the map.
+        if (MapNarrator.AnyMapOpen) return;
         if (GameState.Player != null && Time.timeScale > 0f) return;
 
         try

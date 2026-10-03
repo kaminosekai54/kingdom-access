@@ -70,8 +70,10 @@ internal static class ObjectNames
         // A mount standing in the world, waiting to be bought or ridden (e.g. the Olympus griffin).
         var steed = go.GetComponent<Steed>();
         if (steed != null) return Info(ObjKind.Steed, Loc.T("steed.format", SteedTypeName(steed)));
+        // The boat bell and other parts of the boat object carry boat components too: test them first.
+        if (go.GetComponent<BoatSummoningBell>() != null) return Named(ObjKind.Bell);
         if (go.GetComponent<Boat>() != null || go.GetComponent<PayableBoat>() != null || go.GetComponent<BoatSailPosition>() != null)
-            return Info(ObjKind.Boat, BoatName(c, go));
+            return BoatInfo(c, go);
         if (go.GetComponent<Wharf>() != null) return Named(ObjKind.Wharf);
         if (go.GetComponent<Farmhouse>() != null) return Named(ObjKind.Farmhouse);
         if (go.GetComponent<Farmland>() != null) return Named(ObjKind.Farmland);
@@ -125,6 +127,24 @@ internal static class ObjectNames
         catch { }
         return set;
     }
+
+    private static readonly HashSet<string> LoggedBoatParts = new();
+
+    /// <summary>
+    /// Boat parts. Some objects attached to the boat (bell, gem chest) carry boat components:
+    /// they are told apart by their internal name. Each part name is logged once (diagnostics).
+    /// </summary>
+    private static ObjInfo BoatInfo(Component c, GameObject go)
+    {
+        string lower = go.name.ToLowerInvariant();
+        if (LoggedBoatParts.Add(go.name)) _log?.Info($"[Names] Boat part: '{go.name}'");
+        if (lower.Contains("bell")) return Named(ObjKind.Bell);
+        if (lower.Contains("chest")) return Named(lower.Contains("gem") ? ObjKind.GemChest : ObjKind.Chest);
+        return Info(ObjKind.Boat, BoatName(c, go));
+    }
+
+    internal static IModLog Log { set => _log = value; }
+    private static IModLog _log;
 
     /// <summary>
     /// Distinct names for the boat parts: wreck, hull being built, set-sail point, the boat itself.

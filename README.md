@@ -7,7 +7,7 @@ with sounds when danger approaches.
 
 *[Version française](README.fr.md)*
 
-> Status: **beta (0.9.0)**. Developed and tested by a blind player with NVDA on Windows, on the
+> Status: **beta (0.10.0)**. Developed and tested by a blind player with NVDA on Windows, on the
 > Steam version of the game, mostly in the Norse Lands campaign. Feedback and bug reports are welcome.
 
 ---
@@ -33,14 +33,16 @@ with sounds when danger approaches.
 - Speaks through your screen reader using Tolk (NVDA, JAWS, SuperNova, ZoomText...), with the
   Windows voice as a fallback. Braille works through your screen reader.
 - Follows the game language automatically, and switches when you change it in the game options.
-  French and English are included; other languages fall back to English (see [Languages](#languages)).
+  All 11 languages of the game are included: English, French, German, Spanish, Italian, Portuguese,
+  Russian, Japanese, Korean, Simplified and Traditional Chinese (see [Languages](#languages)).
 - History of the last 50 messages (repeat, previous, next).
 - Keyboard and gamepad: every shortcut exists on both, and all of them are configurable.
 
 **Menus and screens**
 - Standard menus: selected element, its type (checkbox, slider), state, position ("2 of 5"),
   and the text of windows that open. Icon-only buttons get a name.
-- New game screen (world, difficulty, monarch), map and timeline, blazon editor (with
+- New game screen (world, difficulty, monarch), map and timeline (including the Call of Olympus
+  world map: oracle, temples, quest islands, Mount Olympus, and what unlocks them), blazon editor (with
   descriptions of every background and emblem, and colour names), end-of-island summary
   (read in full, then browsable line by line).
 - Tutorial: the ghost's hints are announced (action expected and where the ghost is).
@@ -73,6 +75,7 @@ with sounds when danger approaches.
   the ear the enemy comes from, plus the number of enemies and the distance.
 - Lost crown: alert with position, repeated until you pick it up; a key runs to it.
 - Dawn, day, evening and night: a sound and an announcement.
+- A short chime when the object in front of you can be paid right now.
 - An ability (item of power, ruler, mount) being ready again.
 
 **DLC content**
@@ -86,7 +89,9 @@ with sounds when danger approaches.
   boat parts (wreck, construction, set-sail point, boat).
 - Bomb expedition to the Greed cave: every stage is announced (escort, entrance, crossing,
   guardian, detonation, exit), and while you are beyond the cliff portal the scanner and radar
-  only show that area.
+  only show that area. Inside the cave, a heartbeat guides you to the bomb, where you have to
+  act: faster and louder when closer, in the ear of the side where it is. The bomb's description
+  gives its current position, then the cliff portal's.
 
 ## What it does not do (yet)
 
@@ -96,8 +101,6 @@ with sounds when danger approaches.
 - **Olympus (Call of Olympus)** is only partly covered: its puzzles and quests have not been
   tested yet, and several artifact and mount descriptions are missing on purpose (no reliable
   source).
-- **Other game languages** get the game's own texts but the mod's texts in English until a
-  translation is added.
 > **Note:** all the mod's features should work in multiplayer, except perhaps interactions with the
 > other player (their position, buying a new crown). This has not been tested yet.
 
@@ -202,6 +205,8 @@ replace one with your own file of the same name to change it.
 ## Languages
 
 The mod's texts are in [`Localization/`](Localization/README.md), one JSON file per language.
+English and French were written by hand; the other languages were translated with AI assistance
+and have not been reviewed by native speakers yet: corrections are very welcome.
 Adding a language means copying `en.json`, translating the values, and checking it with
 `python tools/check_localization.py`. See the [localization guide](Localization/README.md).
 
@@ -214,6 +219,8 @@ These parts work in principle but have not been confirmed in game, or only partl
 - Announcements while galloping: may need tuning (too many or too few).
 - On-screen text reading: may be too talkative in some places (can be turned off).
 - Multiplayer features.
+- Greed cave heartbeat: works, but it is not distinct, loud or regular enough yet; it will be
+  reworked (it can be turned off with `CaveBeacon = false`).
 
 When something is wrong, `Alt+F3` next to it writes the whole island to
 `BepInEx\LogOutput.log`: attach that file to your report.

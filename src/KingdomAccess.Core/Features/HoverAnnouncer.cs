@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using KingdomAccess.Game;
 using KingdomAccess.Localization;
+using KingdomAccess.Speech;
 using UnityEngine;
 using SpeechOut = KingdomAccess.Speech.Speech;
 
@@ -64,7 +65,9 @@ internal static class HoverAnnouncer
         if (target != _last || message != _lastMessage)
         {
             // A new object cuts the previous announcement; an update of the same object waits.
-            SpeechOut.Say(message, target != _last);
+            bool isNew = target != _last;
+            SpeechOut.Say(message, isNew);
+            if (isNew && s.PaySound && CanPayHere(player, target)) GameAudio.Chime();
             _lastMessage = message;
             _lastSpokenMessage = message;
             _lastSpokenTarget = target;
@@ -171,7 +174,15 @@ internal static class HoverAnnouncer
 
         if (!string.IsNullOrEmpty(a.LockText)) parts.Add(a.LockText);
         else if (!GameState.CanPayNow(p))
-            parts.Add(DlcObjects.WhyUnavailable(p.gameObject, player) ?? Missing(player, a) ?? Loc.T("state.unavailable_now"));
+        {
+            // The game's "can pay" answer is only meaningful when the player stands at the object,
+            // and it is wrong for the boat (refused although sailing works): precise reasons are
+            // always given, the generic "unavailable right now" only in front of the object.
+            string reason = DlcObjects.WhyUnavailable(p.gameObject, player) ?? Missing(player, a);
+            bool atObject = Selected(player) == p || Mathf.Abs(p.transform.position.x - GameState.PlayerX(player)) < 3f;
+            if (reason == null && atObject && a.Info.Kind != ObjKind.Boat) reason = Loc.T("state.unavailable_now");
+            if (reason != null) parts.Add(reason);
+        }
         else
         {
             string missing = Missing(player, a);
@@ -194,6 +205,19 @@ internal static class HoverAnnouncer
         }
         catch { }
         return 0;
+    }
+
+    /// <summary>True if the player can pay this object right now (not locked, coins enough).</summary>
+    private static bool CanPayHere(Player player, Payable p)
+    {
+        try
+        {
+            var a = Analyze(player, p);
+            if (!string.IsNullOrEmpty(a.LockText) || a.Price <= 0) return false;
+            if (a.Info.Kind != ObjKind.Boat && !GameState.CanPayNow(p)) return false;
+            return Missing(player, a) == null;
+        }
+        catch { return false; }
     }
 
     /// <summary>"2 coins missing" when the wallet cannot pay the price, otherwise null.</summary>
@@ -277,7 +301,7 @@ internal static class HoverAnnouncer
             case ObjKind.CrownStatue:
             case ObjKind.Puzzle: return currency == CurrencyType.Gems ? "act.pay" : "act.activate";
             case ObjKind.Steed: return "act.ride";
-            case ObjKind.CaveBomb: return "act.push"; case ObjKind.Oracle: return "act.consult"; case ObjKind.Shipyard: return "act.build_ship"; case ObjKind.Border: return "act.activate";
+            case ObjKind.CaveBomb: return CaveNarrator.BombAtDetonation(p.gameObject) ? "act.detonate" : "act.push"; case ObjKind.Oracle: return "act.consult"; case ObjKind.Shipyard: return "act.build_ship"; case ObjKind.Border: return "act.activate";
             case ObjKind.Banner: return "act.expedition";
             case ObjKind.Bell: return "act.call";
             case ObjKind.Boat:

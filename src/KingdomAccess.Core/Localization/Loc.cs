@@ -102,7 +102,7 @@ public static class Loc
                 for (int i = 0; list != null && i < list.Count; i++)
                 {
                     var m = list[i];
-                    if (m?.texts != null && m.texts.Pointer == texts.Pointer && m.systemLanguage == SystemLanguage.ChineseTraditional)
+                    if (m?.texts != null && m.texts.Pointer == texts.Pointer && m.systemLanguage == UnityEngine.SystemLanguage.ChineseTraditional)
                         return "zh-Hant";
                 }
             }

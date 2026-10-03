@@ -116,7 +116,7 @@ internal static class PassingAnnouncer
             foreach (var chest in Object.FindObjectsByType<Chest>(FindObjectsSortMode.None))
                 Add(chest, Loc.T("obj.chest"), false);
             foreach (var boat in Object.FindObjectsByType<Boat>(FindObjectsSortMode.None))
-                if (!boat.gameObject.name.ToLowerInvariant().Contains("wreck")) Add(boat, Loc.T("obj.boat"), false);
+                if (!boat.gameObject.name.ToLowerInvariant().Contains("wreck")) Add(boat, ObjectNames.Identify(boat).Name, false);
             foreach (var nest in Object.FindObjectsByType<CaveEnemySpawner>(FindObjectsSortMode.None))
                 Add(nest, Loc.T("obj.cavenest"), false);
         }

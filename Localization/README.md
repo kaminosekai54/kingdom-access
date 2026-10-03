@@ -9,8 +9,24 @@ Localization/
   Core/     texts of the mod -> installed as BepInEx/plugins/KingdomAccess/Lang/
 ```
 
-The folder contains one JSON file per language, named after the game's language code
-(`en.json`, `fr.json`...). English is the reference.
+The folder contains one JSON file per language, named after the game's language code. English is
+the reference.
+
+| File | Language | Notes |
+|---|---|---|
+| `en.json` | English | reference, written by hand |
+| `fr.json` | French | written by hand |
+| `de.json`, `es.json`, `it.json`, `pt.json`, `ru.json` | German, Spanish, Italian, Portuguese, Russian | AI-assisted, to be reviewed |
+| `jp.json` | Japanese | the game uses the code `jp` (not `ja`); AI-assisted, to be reviewed |
+| `ko.json` | Korean | AI-assisted, to be reviewed |
+| `zh.json` | Simplified Chinese | AI-assisted, to be reviewed |
+| `zh-Hant.json` | Traditional Chinese | converted from `zh.json` with OpenCC (Taiwan phrasing), to be reviewed |
+
+Both Chinese languages use the code `zh` in the game; the mod tells Traditional Chinese apart by
+its system language and loads `zh-Hant.json` for it. The mod log lists the game's languages and
+their codes at startup (`[Language] Game languages: ...`).
+
+Reviewing a translation is very welcome: fix the values in the file and open a pull request.
 
 ## How the language is chosen
 

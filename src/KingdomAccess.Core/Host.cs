@@ -56,6 +56,10 @@ public sealed class AccessSettings
     public bool CrownAlert = true;
     public bool AnnounceDayPhases = true;
     public bool SoundsEnabled = true;
+    /// <summary>Inside the Greed cave, a heartbeat guides the player to the bomb's detonation point.</summary>
+    public bool CaveBeacon = true;
+    /// <summary>A short chime when the object in front of the player can be paid right now.</summary>
+    public bool PaySound = true;
 
     // ----- Menus -----
     public bool MenuNarration = true;
