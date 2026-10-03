@@ -58,15 +58,55 @@ public static class Loc
         string code = GameLanguageCode();
         if (string.IsNullOrEmpty(code) || code == _lastGameCode) return;
         _lastGameCode = code;
+        LogGameLanguages();
         Apply(code);
     }
 
+    private static bool _languagesLogged;
+
+    /// <summary>Writes the game's languages and their codes to the log once (for translators).</summary>
+    private static void LogGameLanguages()
+    {
+        if (_languagesLogged) return;
+        _languagesLogged = true;
+        try
+        {
+            var list = global::Language._includedLanguages;
+            if (list == null) return;
+            var codes = new List<string>();
+            for (int i = 0; i < list.Count; i++)
+            {
+                var m = list[i];
+                if (m?.texts == null) continue;
+                codes.Add($"{m.texts.languageCode} ({m.systemLanguage})");
+            }
+            _log?.Info($"[Language] Game languages: {string.Join(", ", codes)}");
+        }
+        catch { }
+    }
+
+    /// <summary>
+    /// Game language code. Both Chinese languages use "zh" in the game: Traditional Chinese is
+    /// told apart by its system language and mapped to "zh-Hant" (Simplified stays "zh").
+    /// </summary>
     private static string GameLanguageCode()
     {
         try
         {
             var texts = global::Language.current;
-            return texts == null ? null : texts.languageCode;
+            if (texts == null) return null;
+            string code = texts.languageCode;
+            if (code == "zh")
+            {
+                var list = global::Language._includedLanguages;
+                for (int i = 0; list != null && i < list.Count; i++)
+                {
+                    var m = list[i];
+                    if (m?.texts != null && m.texts.Pointer == texts.Pointer && m.systemLanguage == SystemLanguage.ChineseTraditional)
+                        return "zh-Hant";
+                }
+            }
+            return code;
         }
         catch { return null; }
     }

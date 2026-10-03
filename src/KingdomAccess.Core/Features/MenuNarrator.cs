@@ -47,6 +47,8 @@ internal static class MenuNarrator
         if (go != _last)
         {
             _last = go;
+            // Olympus world-map island buttons are announced by the map narrator.
+            if (MapNarrator.IsGreekLandButton(go)) return;
             string text = Describe(go, out Transform panel);
             if (panel != _lastPanel)
             {
