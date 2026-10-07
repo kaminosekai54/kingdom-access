@@ -60,6 +60,12 @@ public sealed class AccessSettings
     public bool CaveBeacon = true;
     /// <summary>A short chime when the object in front of the player can be paid right now.</summary>
     public bool PaySound = true;
+    /// <summary>Play the earcon of the object selected by the game (castle, wall, tower, mount...).</summary>
+    public bool HoverSounds = true;
+    /// <summary>Default range of the sound radar (switched in game between 30, 50 and 100).</summary>
+    public float SoundRadarRange = 30f;
+    /// <summary>Seconds between two sounds of the sound radar.</summary>
+    public float SoundRadarDelay = 0.45f;
 
     // ----- Menus -----
     public bool MenuNarration = true;
@@ -113,6 +119,9 @@ public sealed class AccessKeys
         D("Census", "P", "RB+DpadDown", "Population: troops by type."),
         D("Radar", "V", "LB+Y", "Nearest interesting objects on each side."),
         D("TargetDetails", "X", "LB+B", "Details of the object in front of you (price, level, distance).", "Shift+V"),
+        D("SoundRadar", "N", "LB+Start", "Sound radar: the sound of each object around you, nearest first, on its side."),
+        D("SoundRadarRange", "Ctrl+N", "RB+Start", "Sound radar range: 30, 50 or 100."),
+        D("SoundLegend", "Alt+N", "", "Sound legend: listen to every object sound with its name."),
         D("NextCategory", "Home", "LB+DpadDown", "Scanner: next category."),
         D("PreviousCategory", "Ctrl+Home", "LB+DpadUp", "Scanner: previous category.", "Shift+Home"),
         D("RepeatItem", "E", "LB+X", "Reread the selected item with its current distance.", "Ctrl+Home"),

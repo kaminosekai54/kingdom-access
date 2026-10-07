@@ -7,7 +7,7 @@ with sounds when danger approaches.
 
 *[Version française](README.fr.md)*
 
-> Status: **beta (0.10.0)**. Developed and tested by a blind player with NVDA on Windows, on the
+> Status: **beta (0.11.0)**. Developed and tested by a blind player with NVDA on Windows, on the
 > Steam version of the game, mostly in the Norse Lands campaign. Feedback and bug reports are welcome.
 
 ---
@@ -76,6 +76,20 @@ with sounds when danger approaches.
 - Lost crown: alert with position, repeated until you pick it up; a key runs to it.
 - Dawn, day, evening and night: a sound and an announcement.
 - A short chime when the object in front of you can be paid right now.
+
+**Sounds of objects**
+- Every kind of object has its own short sound, played when the game selects it: castle, wall,
+  tower, farm, merchant, tree, camp, character, statue, treasure, danger (portal, enemy), boat,
+  puzzle, bomb, other building. Each shop sounds like what it sells (bowstring, hammer, blade,
+  drawn pike, shield, anvil, martial arts strike, catapult). Mounts play their own cry from the
+  game. The same sound lower means "to build", higher means "to upgrade": one sound, no suffix.
+- **Sound radar**: plays the sound of every object around you, nearest first, one after the other.
+  Farther objects are quieter, and each sound plays only in the ear of its side. Range 30, 50 or
+  100, switched in game.
+- **Sound legend**: listen to every sound with its name.
+- The object sounds come from [Kenney](https://kenney.nl)'s CC0 packs (Impact Sounds, RPG Audio,
+  Interface Sounds, Casino Audio). Each one is a file in `BepInEx\plugins\KingdomAccess\Sounds\Earcons`
+  (`castle.wav`, `wall.wav`...): replace it with any 16-bit WAV file to change the sound.
 - An ability (item of power, ruler, mount) being ready again.
 
 **DLC content**
@@ -129,6 +143,9 @@ split-screen co-op). Press **F1** in game for the list of your current shortcuts
 | P | Population: troop census |
 | V | Radar |
 | X | Details of the object in front of you |
+| N | Sound radar: the sound of each object around you, on its side |
+| Ctrl+N | Sound radar range: 30, 50 or 100 |
+| Alt+N | Sound legend (browse with Page Up / Page Down) |
 | Home / Ctrl+Home | Scanner: next / previous category |
 | Page Up / Page Down | Previous / next item of the last list (scanner, radar, census, help, summary...) |
 | E | Reread the selected item with its current distance |
@@ -156,6 +173,7 @@ the pad, so a mod shortcut never drops a coin or moves the monarch.
 | Y | Radar | D-pad left / right | Behind the left / right wall |
 | B | Object in front of you | RS (click) | Run to the lost crown |
 | View | Repeat last message | View | Help |
+| Menu | Sound radar | Menu | Sound radar range |
 | RS (click) | Read the screen | LS (click) | Tutorial hint |
 | LS (click) | Screen texts list | LT / RT | Previous / next message |
 
@@ -179,6 +197,16 @@ the pad, so a mod shortcut never drops a coin or moves the monarch.
    focus, the add-on stops key presses from interrupting speech; the mod interrupts speech itself
    when it has something new to say. Do not use NVDA's sleep mode in the game: it also silences
    the mod.
+
+   **Without the add-on**, NVDA's own settings help part of the way: in NVDA's settings, Keyboard
+   category, uncheck "Speech interrupt for typed characters" and "Speech interrupt for Enter key".
+   Do it in a configuration profile for the game, so that it only applies there: with the game
+   focused, press NVDA+Ctrl+P, choose "New", select the "Current application" trigger, then change
+   the two settings while that profile is active. Arrow keys may still interrupt speech; the
+   add-on remains the most complete solution.
+
+   **JAWS users**: if the arrow keys seem to do nothing in the game, JAWS's virtual cursor may be
+   catching them; turn it off while playing.
 4. **Start the game** with your screen reader running. After a few seconds you should hear
    "Kingdom Access version ... loaded".
 
@@ -191,7 +219,9 @@ shortcut is documented in the file. Sections:
 2. **Announcements**: object selected by the game, objects passed while galloping, kingdom and
    camp zones, on-screen texts and tutorial, abilities ready.
 3. **Radar and scanner**: ranges, explored-area-only mode and its margin, destroyed portals.
-4. **Alerts and sounds**: enemy alert and its distance, crown alert, day phases, sounds.
+4. **Alerts and sounds**: enemy alert and its distance, crown alert, day phases, sounds, object
+   sounds on hover (`HoverSounds`), sound radar range (`SoundRadarRange`) and delay between its
+   sounds (`SoundRadarDelay`), pay chime, cave heartbeat.
 5. **Menus**: menu narration, menu logging (development).
 6. **Keys**: every shortcut, e.g. `Wallet = O`, `Radar = V`, `TargetDetails = X`. Key names
    are Unity key names (`F5`, `PageDown`, `LeftArrow`...); modifiers are `Ctrl`, `Shift`, `Alt`.
@@ -219,8 +249,8 @@ These parts work in principle but have not been confirmed in game, or only partl
 - Announcements while galloping: may need tuning (too many or too few).
 - On-screen text reading: may be too talkative in some places (can be turned off).
 - Multiplayer features.
-- Greed cave heartbeat: works, but it is not distinct, loud or regular enough yet; it will be
-  reworked (it can be turned off with `CaveBeacon = false`).
+- Greed cave heartbeat: first version, to be tuned (it can be turned off with `CaveBeacon = false`).
+- Object sounds and sound radar: are the sounds distinct and clear enough? (listen with Alt+N).
 
 When something is wrong, `Alt+F3` next to it writes the whole island to
 `BepInEx\LogOutput.log`: attach that file to your report.

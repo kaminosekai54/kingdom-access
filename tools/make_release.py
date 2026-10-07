@@ -20,8 +20,11 @@ files = {
     "nvdaControllerClient64.dll": os.path.join(ROOT, "lib", "native", "nvdaControllerClient64.dll"),
 }
 for folder in ("Lang", "Sounds"):
-    for f in os.listdir(os.path.join(OUT, folder)):
-        files[f"{folder}/{f}"] = os.path.join(OUT, folder, f)
+    base = os.path.join(OUT, folder)
+    for dp, _, names in os.walk(base):
+        for f in names:
+            rel = os.path.relpath(os.path.join(dp, f), base).replace(os.sep, "/")
+            files[f"{folder}/{rel}"] = os.path.join(dp, f)
 
 missing = [p for p in files.values() if not os.path.exists(p)]
 if missing:
@@ -33,6 +36,10 @@ Tolk.dll - Tolk screen reader abstraction library, https://github.com/dkager/tol
   License: GNU Lesser General Public License v3.0.
 nvdaControllerClient64.dll - NVDA controller client, NV Access, https://www.nvaccess.org
   License: GNU Lesser General Public License v2.1.
+
+Sounds/Earcons/*.wav - sounds from Kenney (https://kenney.nl): Impact Sounds, RPG Audio,
+  Interface Sounds and Casino Audio packs. License: Creative Commons CC0 (public domain).
+  Trimmed and normalised.
 
 These libraries are distributed unmodified. Their source code is available at the addresses above.
 """

@@ -27,10 +27,12 @@
     <ItemGroup>
       <LangFiles Include="$(OutDir)Lang\*.json" />
       <SoundFiles Include="$(OutDir)Sounds\*.wav" />
+      <EarconFiles Include="$(OutDir)Sounds\Earcons\*.*" />
     </ItemGroup>
     <Copy SourceFiles="$(OutDir)KingdomAccess.BepInEx.dll;$(OutDir)KingdomAccess.Core.dll" DestinationFolder="$(PluginDir)" />
     <Copy SourceFiles="@(LangFiles)" DestinationFolder="$(PluginDir)\Lang" />
     <Copy SourceFiles="@(SoundFiles)" DestinationFolder="$(PluginDir)\Sounds" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(EarconFiles)" DestinationFolder="$(PluginDir)\Sounds\Earcons" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(NativeLib)" DestinationFolder="$(PluginDir)" SkipUnchangedFiles="true" />
     <Message Importance="high" Text="KingdomAccess installed in $(PluginDir)" />
   </Target>

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using KingdomAccess.Game;
 using KingdomAccess.Localization;
+using KingdomAccess.Speech;
 using UnityEngine;
 using SpeechOut = KingdomAccess.Speech.Speech;
 
@@ -21,6 +22,7 @@ internal static class PassingAnnouncer
         public Component Obj;
         public string Name;
         public bool IsPayable;
+        public ObjKind Kind;
     }
 
     private const float Margin = 0.8f;
@@ -67,6 +69,28 @@ internal static class PassingAnnouncer
             if (!string.IsNullOrEmpty(full)) text = full;
         }
         SpeechOut.Say(text, true); // each new object passed cuts the previous one
+        if (s.HoverSounds) PlaySound(player, best, x);
+    }
+
+    /// <summary>The object's sound, on the side where it is (like the sound radar).</summary>
+    private static void PlaySound(Player player, Candidate c, float playerX)
+    {
+        try
+        {
+            float dx = c.Obj.transform.position.x - playerX;
+            float pan = Mathf.Abs(dx) < 1f ? 0f : Mathf.Sign(dx);
+            if (c.Kind == ObjKind.Steed)
+            {
+                var steed = c.Obj.GetComponentInChildren<Steed>(true);
+                if (steed != null) { Earcons.PlayMount(steed, 0.9f, pan); return; }
+            }
+            string action = null;
+            var p = c.IsPayable ? c.Obj.TryCast<Payable>() : null;
+            if (p != null) action = HoverAnnouncer.Analyze(player, p).ActionKey;
+            var kind = c.Kind == ObjKind.Unknown ? ObjKind.Upgrade : c.Kind;
+            Earcons.Play(Earcons.KeyFor(c.Obj, kind, action), 0.9f, pan);
+        }
+        catch { }
     }
 
     private static bool IsRunning(Player player)
@@ -80,11 +104,11 @@ internal static class PassingAnnouncer
     {
         Candidates.Clear();
         var seen = new HashSet<System.IntPtr>();
-        void Add(Component c, string name, bool payable)
+        void Add(Component c, string name, bool payable, ObjKind kind = ObjKind.Unknown)
         {
             if (c == null || !c.gameObject.activeInHierarchy || !seen.Add(c.gameObject.Pointer)) return;
             if (!CaveNarrator.InPlayerZone(c.transform.position.x)) return;
-            Candidates.Add(new Candidate { Obj = c, Name = name, IsPayable = payable });
+            Candidates.Add(new Candidate { Obj = c, Name = name, IsPayable = payable, Kind = kind });
         }
 
         var payables = GameState.Payables;
@@ -105,20 +129,20 @@ internal static class PassingAnnouncer
                         if (!CategoryScanner.IsCuttable(p)) continue;
                         break;
                 }
-                Add(p, info.Name, true);
+                Add(p, info.Name, true, info.Kind);
             }
         }
 
         foreach (var portal in UnitCache.All<Portal>(UnitKind.Portal))
-            Add(portal, ObjectNames.PortalName(portal), false);
+            Add(portal, ObjectNames.PortalName(portal), false, ObjKind.Portal);
         try
         {
             foreach (var chest in Object.FindObjectsByType<Chest>(FindObjectsSortMode.None))
-                Add(chest, Loc.T("obj.chest"), false);
+                Add(chest, Loc.T("obj.chest"), false, ObjKind.Chest);
             foreach (var boat in Object.FindObjectsByType<Boat>(FindObjectsSortMode.None))
                 if (!boat.gameObject.name.ToLowerInvariant().Contains("wreck")) Add(boat, ObjectNames.Identify(boat).Name, false);
             foreach (var nest in Object.FindObjectsByType<CaveEnemySpawner>(FindObjectsSortMode.None))
-                Add(nest, Loc.T("obj.cavenest"), false);
+                Add(nest, Loc.T("obj.cavenest"), false, ObjKind.CaveNest);
         }
         catch { }
         foreach (var d in DlcObjects.All(Time.unscaledTime))
@@ -127,7 +151,7 @@ internal static class PassingAnnouncer
             try { type = d.GetIl2CppType().Name; } catch { }
             if (type == null || type.EndsWith("Controller")) continue; // invisible puzzle logic
             var info = DlcObjects.Identify(d.gameObject);
-            if (info.HasValue) Add(d, info.Value.Name, d.GetComponent<Payable>() != null);
+            if (info.HasValue) Add(d, info.Value.Name, d.GetComponent<Payable>() != null, ObjKind.Puzzle);
         }
     }
 }

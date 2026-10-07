@@ -15,7 +15,7 @@ namespace KingdomAccess;
 /// </summary>
 public static class AccessMod
 {
-    public const string Version = "0.10.0";
+    public const string Version = "0.11.0";
 
     private static ModContext _ctx;
     private static bool _initialized;
@@ -36,6 +36,8 @@ public static class AccessMod
         ScreenReader.Initialize(ctx.ModDirectory, ctx.Settings.SapiFallback, log);
         Sounds.Initialize(ctx.ModDirectory, ctx.Settings.SoundsEnabled);
         GameAudio.Enabled = ctx.Settings.SoundsEnabled;
+        GameAudio.Log = log;
+        Earcons.Initialize(ctx.ModDirectory);
         GameState.SetLog(log);
         BiomeSelectPatches.Log = log;
         TutorialNarrator.Log = log;
@@ -45,6 +47,7 @@ public static class AccessMod
         CrownWatcher.Initialize(log);
         GameInputBlocker.Initialize(log);
         StartupNarrator.Initialize(log);
+        SoundRadar.Initialize(ctx.Settings);
         UnitCache.Initialize(log);
         DlcObjects.Initialize(log);
         ApplyAttributePatches(harmony, log);
@@ -120,6 +123,7 @@ public static class AccessMod
             {
                 _welcomeDone = true;
                 SpeechOut.Say(Loc.T("mod.loaded", Version, HelpList.Spoken(s.Keys["Help"])), false);
+                GameAudio.SelfTest();
             }
 
             if (!s.Enabled) return;
@@ -128,6 +132,7 @@ public static class AccessMod
             // Gamepad: read it, and block the game's own pad input while a mod layer is held.
             if (s.GamepadEnabled) Gamepad.Poll();
             GameInputBlocker.Tick(s);
+            SoundRadar.Tick(now);
 
             // Menus and screens that exist outside of gameplay.
             HandleGlobalKeys(s);
@@ -195,6 +200,7 @@ public static class AccessMod
         CaveNarrator.Reset();
         PassingAnnouncer.Reset();
         GameInputBlocker.Release();
+        SoundRadar.Stop();
     }
 
     // ---------- Shortcuts ----------
@@ -214,6 +220,7 @@ public static class AccessMod
         if (Hit(k, "NextMessage")) SpeechOut.Next();
         if (Hit(k, "Help")) HelpList.Show(s);
         if (Hit(k, "TutorialHint")) TutorialNarrator.Repeat(p);
+        if (Hit(k, "SoundLegend")) SoundRadar.ShowLegend();
         if (ExternalKeyCapture) return;
 
         if (Hit(k, "ReadScreen")) MenuNarrator.ReadScreen();
@@ -239,6 +246,8 @@ public static class AccessMod
         if (Hit(k, "Census")) Census.Show(player);
         if (Hit(k, "Radar")) Radar.Pulse(player, s);
         if (Hit(k, "TargetDetails")) Reports.TargetDetails(player, s);
+        if (Hit(k, "SoundRadar")) SoundRadar.Scan(player);
+        if (Hit(k, "SoundRadarRange")) SoundRadar.CycleRange();
 
         if (Hit(k, "NextCategory")) CategoryScanner.ChangeCategory(player, 1, s);
         if (Hit(k, "PreviousCategory")) CategoryScanner.ChangeCategory(player, -1, s);

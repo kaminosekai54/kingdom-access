@@ -87,6 +87,14 @@ public class Plugin : BasePlugin
             "Inside the Greed cave, a heartbeat guides you to the bomb's detonation point (faster and louder when closer, on the side of the point).").Value;
         s.PaySound = cfg.Bind(alerts, "PaySound", d.PaySound,
             "Short chime when the object in front of you can be paid right now.").Value;
+        s.HoverSounds = cfg.Bind(alerts, "HoverSounds", d.HoverSounds,
+            "Play the sound of the object selected by the game (castle, wall, tower, farm, mount cry...).").Value;
+        var radarRange = cfg.Bind(alerts, "SoundRadarRange", d.SoundRadarRange,
+            "Starting range of the sound radar; switch it in game between 30, 50 and 100 (SoundRadarRange shortcut).");
+        if (Math.Abs(radarRange.Value - 50f) < 0.01f) radarRange.Value = d.SoundRadarRange; // former default
+        s.SoundRadarRange = radarRange.Value;
+        s.SoundRadarDelay = cfg.Bind(alerts, "SoundRadarDelay", d.SoundRadarDelay,
+            "Seconds between two sounds of the sound radar (0.1 to 3).").Value;
         s.SoundsEnabled = cfg.Bind(alerts, "SoundsEnabled", d.SoundsEnabled,
             "Mod sounds (Sounds folder; replace a WAV file with your own, keeping its name).").Value;
 

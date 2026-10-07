@@ -14,8 +14,44 @@ internal static class GameAudio
     private const int Rate = 44100;
     private static GameObject _host;
     private static AudioSource _source;
+    /// <summary>
+    /// Several sources: the stereo position applies to everything a source plays, so each
+    /// overlapping sound needs its own source to keep its side.
+    /// </summary>
+    private static AudioSource[] _pool;
+    private static int _next;
     private static AudioClip _heartbeat, _chime;
     public static bool Enabled = true;
+    internal static IModLog Log;
+    private static bool _selfTestDone;
+
+    /// <summary>
+    /// Diagnostics, once: plays an almost silent sound and logs what Unity reports (listener,
+    /// global volume, clip, whether the source really plays).
+    /// </summary>
+    public static void SelfTest()
+    {
+        if (_selfTestDone) return;
+        _selfTestDone = true;
+        try
+        {
+            var listeners = UnityEngine.Object.FindObjectsByType<AudioListener>(FindObjectsSortMode.None);
+            int active = 0;
+            foreach (var l in listeners) if (l != null && l.isActiveAndEnabled) active++;
+            bool ok = Ensure();
+            var clip = _chime;
+            string clipInfo = clip == null ? "null" : $"{clip.length:0.00}s {clip.samples} samples {clip.loadState}";
+            AudioSource src = null;
+            if (ok && clip != null)
+            {
+                src = NextSource();
+                src.panStereo = 0f;
+                src.PlayOneShot(clip, 0.01f);
+            }
+            Log?.Info($"[Audio] self-test: source ok={ok}, listeners={listeners.Length} (active {active}), AudioListener.volume={AudioListener.volume:0.00}, pause={AudioListener.pause}, clip={clipInfo}, playing={(src != null && src.isPlaying)}, source volume={(src != null ? src.volume : -1f):0.00}, mute={(src != null && src.mute)}");
+        }
+        catch (Exception ex) { Log?.Error($"[Audio] self-test failed: {ex}"); }
+    }
 
     private static bool Ensure()
     {
@@ -25,23 +61,74 @@ internal static class GameAudio
             _host = new GameObject("KingdomAccessAudio");
             UnityEngine.Object.DontDestroyOnLoad(_host);
             _host.hideFlags = HideFlags.HideAndDontSave;
-            _source = _host.AddComponent<AudioSource>();
-            _source.playOnAwake = false;
-            _source.spatialBlend = 0f;          // 2D: the stereo position is set by hand
-            _source.ignoreListenerPause = true;  // also audible while the game is paused
+            _pool = new AudioSource[6];
+            for (int i = 0; i < _pool.Length; i++)
+            {
+                var src = _host.AddComponent<AudioSource>();
+                src.playOnAwake = false;
+                src.spatialBlend = 0f;          // 2D: the stereo position is set by hand
+                src.ignoreListenerPause = true;  // also audible while the game is paused
+                _pool[i] = src;
+            }
+            _source = _pool[0];
             _heartbeat = Make("ka_heartbeat", HeartbeatSamples());
             _chime = Make("ka_chime", ChimeSamples());
             return true;
         }
-        catch { _source = null; return false; }
+        catch (Exception ex) { Log?.Error($"[Audio] Could not create the audio sources: {ex}"); _source = null; return false; }
     }
 
-    private static AudioClip Make(string name, float[] samples)
+    /// <summary>Creates a mono clip from generated samples.</summary>
+    public static AudioClip MakeClip(string name, float[] samples) => Make(name, samples);
+
+    /// <summary>Plays any clip (generated or from the game). pan: -1 left to 1 right; volume: 0 to 1.</summary>
+    public static void PlayClip(AudioClip clip, float volume, float pan)
     {
-        var clip = AudioClip.Create(name, samples.Length, 1, Rate, false);
-        clip.SetData(new Il2CppStructArray<float>(samples), 0);
+        if (!Enabled || clip == null || !Ensure()) return;
+        try
+        {
+            var src = NextSource();
+            src.panStereo = Mathf.Clamp(pan, -1f, 1f);
+            src.PlayOneShot(clip, Mathf.Clamp01(volume));
+        }
+        catch { }
+    }
+
+    // In Unity 6, AudioClip.SetData only takes a ReadOnlySpan, which this Il2CppInterop version
+    // cannot marshal (MissingMethodException): every generated sound stayed silent. The engine's
+    // internal call is used directly instead, with the same span wrapper layout (pointer, length).
+    private delegate bool SetDataInjected(IntPtr clip, IntPtr spanWrapper, int samplesOffset);
+    private static SetDataInjected _setData;
+
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Explicit)]
+    private struct SpanWrapper
+    {
+        [System.Runtime.InteropServices.FieldOffset(0)] public IntPtr Begin;
+        [System.Runtime.InteropServices.FieldOffset(8)] public int Length;
+    }
+
+    private static unsafe AudioClip Make(string name, float[] samples)
+    {
+        // AudioClip.Create also passes the clip name as a span: build the clip by hand instead
+        // (Construct_Internal, then the CreateUserSound internal call with a char span wrapper).
+        var clip = AudioClip.Construct_Internal();
+        _createUserSound ??= Il2CppInterop.Runtime.IL2CPP.ResolveICall<CreateUserSoundInjected>("UnityEngine.AudioClip::CreateUserSound_Injected");
+        fixed (char* chars = name)
+        {
+            var nameSpan = new SpanWrapper { Begin = (IntPtr)chars, Length = name.Length };
+            _createUserSound(clip.m_CachedPtr, (IntPtr)(&nameSpan), samples.Length, 1, Rate, false);
+        }
+        _setData ??= Il2CppInterop.Runtime.IL2CPP.ResolveICall<SetDataInjected>("UnityEngine.AudioClip::SetData_Injected");
+        fixed (float* begin = samples)
+        {
+            var wrapper = new SpanWrapper { Begin = (IntPtr)begin, Length = samples.Length };
+            _setData(clip.m_CachedPtr, (IntPtr)(&wrapper), 0);
+        }
         return clip;
     }
+
+    private delegate void CreateUserSoundInjected(IntPtr self, IntPtr nameSpan, int lengthSamples, int channels, int frequency, bool stream);
+    private static CreateUserSoundInjected _createUserSound;
 
     /// <summary>Heartbeat: two low thumps, the second one softer.</summary>
     private static float[] HeartbeatSamples()
@@ -96,9 +183,24 @@ internal static class GameAudio
         if (clip == null) clip = isHeartbeat ? _heartbeat : _chime;
         try
         {
-            _source.panStereo = Mathf.Clamp(pan, -1f, 1f);
-            _source.PlayOneShot(clip, Mathf.Clamp01(volume));
+            var src = NextSource();
+            src.panStereo = Mathf.Clamp(pan, -1f, 1f);
+            src.PlayOneShot(clip, Mathf.Clamp01(volume));
         }
         catch { }
+    }
+
+    /// <summary>A free source if possible, otherwise the oldest one.</summary>
+    private static AudioSource NextSource()
+    {
+        for (int i = 0; i < _pool.Length; i++)
+        {
+            var s = _pool[(_next + i) % _pool.Length];
+            if (!s.isPlaying) { _next = (_next + i + 1) % _pool.Length; return s; }
+        }
+        var r = _pool[_next];
+        _next = (_next + 1) % _pool.Length;
+        r.Stop();
+        return r;
     }
 }

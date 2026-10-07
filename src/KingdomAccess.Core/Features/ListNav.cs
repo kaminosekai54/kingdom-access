@@ -15,6 +15,8 @@ internal sealed class NavEntry
     public string Name;
     /// <summary>Object the walk shortcut goes to (may be null).</summary>
     public Component Target;
+    /// <summary>Called each time the item is read (e.g. to play its sound in the sound legend).</summary>
+    public System.Action OnRead;
 }
 
 /// <summary>
@@ -63,6 +65,7 @@ internal static class ListNav
         _index = _index < 0 ? (step > 0 ? 0 : _entries.Count - 1)
                             : ((_index + step) % _entries.Count + _entries.Count) % _entries.Count;
         SpeechOut.Say(Read(player, _index));
+        _entries[_index].OnRead?.Invoke();
     }
 
     public static void Repeat(Player player, AccessSettings s)
@@ -71,6 +74,7 @@ internal static class ListNav
         Prune();
         if (_index < 0 || _index >= _entries.Count) { SpeechOut.Say(Loc.T("scan.no_selection")); return; }
         SpeechOut.Say(Read(player, _index));
+        _entries[_index].OnRead?.Invoke();
     }
 
     public static Component SelectedTarget =>

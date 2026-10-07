@@ -7,7 +7,7 @@ vous prévient par des sons quand le danger approche.
 
 *[English version](README.md)*
 
-> État : **bêta (0.10.0)**. Développé et testé par un joueur aveugle avec NVDA sous Windows, sur la
+> État : **bêta (0.11.0)**. Développé et testé par un joueur aveugle avec NVDA sous Windows, sur la
 > version Steam du jeu, surtout dans la campagne des Terres du Nord. Retours et signalements de
 > bugs bienvenus.
 
@@ -65,6 +65,21 @@ vous prévient par des sons quand le danger approche.
   touche vous y fait courir.
 - Aube, jour, soir et nuit : un son et une annonce.
 - Un petit carillon quand l'objet devant vous peut être payé tout de suite.
+
+**Sons des objets**
+- Chaque type d'objet a son propre son bref, joué quand le jeu le sélectionne : château, mur, tour,
+  ferme, marchand, arbre, camp, personnage, statue, trésor, danger (portail, ennemi), bateau, énigme,
+  bombe, autre bâtiment. Chaque magasin sonne comme ce qu'il vend (corde d'arc, marteau, lame, pique
+  dégainée, bouclier, enclume, coup d'art martial, catapulte). Les montures jouent leur propre cri,
+  pris dans le jeu. Le même son plus grave veut dire « à construire », plus aigu « à améliorer » :
+  un seul son, sans suffixe.
+- **Radar sonore** : joue le son de chaque objet autour de vous, du plus proche au plus lointain,
+  l'un après l'autre. Plus l'objet est loin, plus le son est faible, et chaque son ne joue que dans
+  l'oreille de son côté. Portée de 30, 50 ou 100, changée en jeu.
+- **Légende des sons** : écoutez chaque son avec son nom.
+- Les sons des objets viennent des ensembles CC0 de [Kenney](https://kenney.nl) (Impact Sounds, RPG
+  Audio, Interface Sounds, Casino Audio). Chacun est un fichier de `BepInEx\plugins\KingdomAccess\Sounds\Earcons`
+  (`castle.wav`, `wall.wav`...) : remplacez-le par n'importe quel fichier WAV 16 bits pour changer le son.
 - Retour d'une capacité (objet de pouvoir, monarque, monture).
 
 **Contenu des DLC**
@@ -120,6 +135,9 @@ droite (G et J lancent aussi l'écran partagé). **F1** en jeu donne la liste de
 | P | Population : recensement des troupes |
 | V | Radar |
 | X | Détail de l'objet devant vous |
+| N | Radar sonore : le son de chaque objet autour de vous, de son côté |
+| Ctrl+N | Portée du radar sonore : 30, 50 ou 100 |
+| Alt+N | Légende des sons (Page haut / Page bas pour parcourir) |
 | Origine / Ctrl+Origine | Scanner : catégorie suivante / précédente |
 | Page haut / Page bas | Élément précédent / suivant de la dernière liste (scanner, radar, recensement, aide, résumé...) |
 | E | Relire l'élément choisi avec sa distance à jour |
@@ -148,6 +166,7 @@ et ne fait jamais bouger le monarque.
 | Y | Radar | Croix gauche / droite | Derrière le mur de gauche / droite |
 | B | Objet devant vous | Clic du stick droit | Courir vers la couronne perdue |
 | Affichage | Répéter le dernier message | Affichage | Aide |
+| Menu | Radar sonore | Menu | Portée du radar sonore |
 | Clic du stick droit | Relire l'écran | Clic du stick gauche | Indice du tutoriel |
 | Clic du stick gauche | Liste des textes à l'écran | LT / RT | Message précédent / suivant |
 
@@ -171,6 +190,17 @@ et ne fait jamais bouger le monarque.
    Tant que Kingdom Two Crowns a le focus, le module empêche les touches de couper la parole ; le
    mod coupe lui-même la parole quand il a quelque chose de nouveau à dire. N'utilisez pas le mode
    veille de NVDA dans le jeu : il fait aussi taire le mod.
+
+   **Sans le module**, les réglages de NVDA aident en partie : dans les paramètres de NVDA, catégorie
+   Clavier, décochez « Interrompre la parole pour les caractères tapés » et « Interrompre la parole
+   pour la touche Entrée ». Faites-le dans un profil de configuration propre au jeu, pour que ça ne
+   s'applique que là : le jeu ayant le focus, appuyez sur NVDA+Ctrl+P, choisissez « Nouveau »,
+   sélectionnez le déclencheur « Application actuelle », puis changez les deux réglages pendant que
+   ce profil est actif. Les flèches peuvent encore couper la parole ; le module reste la solution la
+   plus complète.
+
+   **Utilisateurs de JAWS** : si les flèches semblent sans effet dans le jeu, le curseur virtuel de
+   JAWS les capture peut-être ; désactivez-le pendant que vous jouez.
 4. **Lancez le jeu** avec votre lecteur d'écran. Après quelques secondes, vous devez entendre
    « Kingdom Access version ... chargée ».
 
@@ -183,7 +213,9 @@ raccourci y est documenté (en anglais). Sections :
 2. **Announcements** : objet sélectionné par le jeu, objets croisés au galop, zones du royaume et
    des camps, textes à l'écran et tutoriel, capacités prêtes.
 3. **Radar and scanner** : portées, limitation à la zone explorée et sa marge, portails détruits.
-4. **Alerts and sounds** : alerte ennemis et sa distance, alerte couronne, moments de la journée, sons.
+4. **Alerts and sounds** : alerte ennemis et sa distance, alerte couronne, moments de la journée, sons,
+   sons des objets au survol (`HoverSounds`), portée du radar sonore (`SoundRadarRange`) et délai entre
+   ses sons (`SoundRadarDelay`), carillon de paiement, battement de cœur de la grotte.
 5. **Menus** : lecture des menus, journal des menus (développement).
 6. **Keys** : chaque raccourci, par exemple `Wallet = O`, `Radar = V`, `TargetDetails = X`.
    Les noms de touches sont ceux d'Unity (`F5`, `PageDown`, `LeftArrow`...) ; les modificateurs
@@ -212,8 +244,8 @@ Ces parties fonctionnent en principe mais n'ont pas été confirmées en jeu, ou
 - Annonces au galop : peuvent demander un réglage (trop ou pas assez).
 - Lecture des textes à l'écran : peut être trop bavarde par endroits (désactivable).
 - Fonctions multijoueur.
-- Battement de cœur de la grotte : il fonctionne, mais il n'est pas encore assez distinct, présent
-  ni régulier ; il sera retravaillé (désactivable avec `CaveBeacon = false`).
+- Battement de cœur de la grotte : première version, à régler (désactivable avec `CaveBeacon = false`).
+- Sons des objets et radar sonore : les sons sont-ils assez distincts et clairs ? (à écouter avec Alt+N).
 
 Quand quelque chose ne va pas, `Alt+F3` à côté écrit toute l'île dans
 `BepInEx\LogOutput.log` : joignez ce fichier à votre signalement.

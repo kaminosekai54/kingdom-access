@@ -67,7 +67,22 @@ internal static class HoverAnnouncer
             // A new object cuts the previous announcement; an update of the same object waits.
             bool isNew = target != _last;
             SpeechOut.Say(message, isNew);
-            if (isNew && s.PaySound && CanPayHere(player, target)) GameAudio.Chime();
+            bool earcon = false;
+            if (isNew && s.HoverSounds)
+            {
+                var a = Analyze(player, target);
+                Steed steed = null;
+                if (a.Info.Kind == ObjKind.Steed) { try { steed = target.GetComponentInChildren<Steed>(true); } catch { } }
+                if (steed != null) Earcons.PlayMount(steed, 0.9f, 0f);
+                else Earcons.Play(Earcons.KeyFor(target, a.Info.Kind, a.ActionKey), 0.9f, 0f);
+                earcon = true;
+            }
+            // The "you can pay here" chime follows the object sound.
+            if (isNew && s.PaySound && CanPayHere(player, target))
+            {
+                if (earcon) SoundRadar.Later(0.45f, GameAudio.Chime);
+                else GameAudio.Chime();
+            }
             _lastMessage = message;
             _lastSpokenMessage = message;
             _lastSpokenTarget = target;
