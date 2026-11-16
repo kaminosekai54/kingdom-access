@@ -4,6 +4,8 @@
     <AssemblyName>KingdomAccess.BepInEx</AssemblyName>
     <RootNamespace>KingdomAccess.BepInExAdapter</RootNamespace>
     <PluginDir>$(BepInExDir)\plugins\KingdomAccess</PluginDir>
+    <!-- Copy NuGet dependencies (NAudio) next to the mod. -->
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,7 +31,7 @@
       <SoundFiles Include="$(OutDir)Sounds\*.wav" />
       <EarconFiles Include="$(OutDir)Sounds\Earcons\*.*" />
     </ItemGroup>
-    <Copy SourceFiles="$(OutDir)KingdomAccess.BepInEx.dll;$(OutDir)KingdomAccess.Core.dll" DestinationFolder="$(PluginDir)" />
+    <Copy SourceFiles="$(OutDir)KingdomAccess.BepInEx.dll;$(OutDir)KingdomAccess.Core.dll;$(OutDir)NAudio.Core.dll;$(OutDir)NAudio.WinMM.dll" DestinationFolder="$(PluginDir)" />
     <Copy SourceFiles="@(LangFiles)" DestinationFolder="$(PluginDir)\Lang" />
     <Copy SourceFiles="@(SoundFiles)" DestinationFolder="$(PluginDir)\Sounds" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(EarconFiles)" DestinationFolder="$(PluginDir)\Sounds\Earcons" SkipUnchangedFiles="true" />

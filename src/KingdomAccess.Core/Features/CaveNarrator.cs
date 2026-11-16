@@ -19,6 +19,7 @@ internal static class CaveNarrator
     private static bool? _beyond;
     private static float _cliffX, _castleX;
     private static bool _hasCliff;
+    private static Portal _cliff;
 
     public static void Reset() { States.Clear(); _beyond = null; _hasCliff = false; }
 
@@ -79,6 +80,7 @@ internal static class CaveNarrator
         if (cliff == null) { _beyond = null; return; }
         _hasCliff = true;
         _cliffX = cliff.transform.position.x;
+        _cliff = cliff;
 
         bool beyond = _cliffX < _castleX ? px < _cliffX : px > _cliffX;
         if (_beyond.HasValue && _beyond.Value != beyond)
@@ -97,9 +99,7 @@ internal static class CaveNarrator
         "CaveEntrance", "GoingInsideCave", "TraversingCave", "FightingBoss", "WaitingForLight"
     };
 
-    private static float? _targetX;
     private static float _nextBeat, _nextTarget;
-    private static bool _reachedSaid;
 
     private static bool InStage(System.Func<string, bool> test)
     {
@@ -132,34 +132,77 @@ internal static class CaveNarrator
     /// </summary>
     public static bool BombAtDetonation(GameObject bombGo) => InStage(s => s == "WaitingForLight");
 
+    private static Component _caveTarget;
+    private static string _caveTargetName;
+    private static bool _caveArrivedSaid;
+
     /// <summary>
-    /// Inside the cave, a heartbeat guides the player to the bomb, where they have to act: faster
-    /// and louder when closer, in the ear of the side where it is. Called every frame.
+    /// Greed cave guidance with the mod's beacon: each remaining Greed nest on the way to the bomb,
+    /// one after the other, then the bomb, and once the fuse is lit, the way out (the cliff
+    /// portal). Each new target is announced with its distance, and the arrival too.
+    /// Called every frame.
     /// </summary>
     public static void BeaconTick(Player player, float now)
     {
+        float px = GameState.PlayerX(player);
         if (now >= _nextTarget)
         {
             _nextTarget = now + 0.25f;
-            _targetX = null;
-            if (InStage(s => CaveStages.Contains(s)))
+            Component target = null;
+            string name = null;
+            if (InStage(st => st == "Detonating"))
             {
-                var bomb = FindBomb(GameState.PlayerX(player));
-                if (bomb != null) _targetX = bomb.transform.position.x;
+                // Fuse lit: get out through the cliff portal.
+                target = _cliff;
+
+                name = Loc.T("cave.target.exit");
+            }
+            else if (InStage(st => CaveStages.Contains(st)))
+            {
+                var bomb = FindBomb(px);
+                if (bomb != null)
+                {
+                    // The next Greed nest between the player and the bomb, else the bomb.
+                    float bx = bomb.transform.position.x;
+                    float dir = Mathf.Sign(bx - px);
+                    Component nest = null;
+                    try
+                    {
+                        foreach (var n in Object.FindObjectsByType<CaveEnemySpawner>(FindObjectsSortMode.None))
+                        {
+                            if (n == null || !n.gameObject.activeInHierarchy) continue;
+                            float nx = n.transform.position.x;
+                            if ((nx - px) * dir < -2f || (bx - nx) * dir < 0f) continue; // behind the player or past the bomb
+                            if (nest == null || Mathf.Abs(nx - px) < Mathf.Abs(nest.transform.position.x - px)) nest = n;
+                        }
+                    }
+                    catch { }
+                    if (nest != null) { target = nest; name = Loc.T("obj.cavenest"); }
+                    else { target = bomb; name = Loc.T(BombAtDetonation(bomb.gameObject) ? "cave.target.fuse" : "cave.target.bomb"); }
+                }
+            }
+            if (target != _caveTarget)
+            {
+                _caveTarget = target;
+                _caveTargetName = name;
+                _caveArrivedSaid = false;
+                if (target != null)
+                {
+                    SpeechOut.Say($"{name}, {Directions.DistanceSide(target.transform.position.x - px)}", false);
+                    _log?.Info($"[Cave] beacon -> {name} at x={target.transform.position.x:0.0}, player x={px:0.0}");
+                }
             }
         }
-        if (_targetX == null) { _reachedSaid = false; return; }
+        if (_caveTarget == null || !_caveTarget.gameObject.activeInHierarchy) { _caveTarget = null; return; }
 
-        float dx = _targetX.Value - GameState.PlayerX(player);
-        float d = Mathf.Abs(dx);
-        if (d < 2f && !_reachedSaid) { _reachedSaid = true; SpeechOut.Say(Loc.T("cave.bomb_here"), false); }
-        else if (d > 5f) _reachedSaid = false;
-
-        if (now < _nextBeat) return;
-        float closeness = Mathf.Clamp01(1f - d / 60f);
-        _nextBeat = now + Mathf.Lerp(1.6f, 0.35f, closeness);
-        float pan = d < 1.5f ? 0f : Mathf.Sign(dx) * Mathf.Clamp01(d / 12f);
-        GameAudio.Heartbeat(Mathf.Lerp(0.25f, 1f, closeness), pan);
+        float dx = _caveTarget.transform.position.x - px;
+        if (Mathf.Abs(dx) < 2f)
+        {
+            if (!_caveArrivedSaid) { _caveArrivedSaid = true; SpeechOut.Say(Loc.T("beacon.reached", _caveTargetName), true); }
+            return;
+        }
+        if (Mathf.Abs(dx) > 5f) _caveArrivedSaid = false;
+        ItemBeacon.BeepToward(dx, now, ref _nextBeat);
     }
 
     /// <summary>Diagnostics: positions and the game's raw bomb points at each expedition stage.</summary>

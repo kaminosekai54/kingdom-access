@@ -1,5 +1,42 @@
 # Changelog
 
+## 0.12.0
+
+**Important fix**
+- **Works again with the October 2026 game update.** The game renamed its DLC window, which made
+  0.11.0 fail on every frame: menus still spoke, but hover, galloping, radar, alerts and the
+  tutorial stayed silent. Please update.
+- **More robust**: each feature now runs on its own. If a future game update breaks one of them,
+  its error is logged once, that feature is switched off, and the rest of the mod keeps working.
+
+**Tutorial**
+- **Clear instructions**, following the game's current step: what to do and where first ("Pick up
+  the coins, 5 to the right", "build: Camp, 12 to the left", "Throw a coin to the vagrant",
+  "Follow the ghost"), then the game's own text.
+- **Tutorial beacon**: while a step is in progress, a beep leads to what the step concerns; the
+  instruction is spoken when you get close, then "you are there". No step in progress, no beep
+  (setting `TutorialBeacon`).
+- **Tutorial journal** (F6, or LB+RB+X on the gamepad): every step in order, with what to do,
+  whether it is done, in progress or to do, and where it is, updated each time a line is read.
+  End walks there. F6 or Escape closes it.
+
+**Beacons**
+- **Sound beacon on any object** (Ctrl+B, or LB+RB+Y): on the selected item of the last list
+  (scanner, radar, journal) or the object in front of you; a beep faster and louder when closer,
+  only in the ear of its side; it stops with "you have arrived". Ctrl+B again stops it.
+- **Alt+B** (LB+RB+B) stops every beacon, the tutorial one included until its next step.
+- **Greed cave**: the heartbeat is replaced by the beacon, leading nest after nest to the bomb,
+  then to the exit once the fuse is lit; each new target is announced (setting `CaveBeacon`).
+
+**Sound**
+- **Own audio output** (NAudio, MIT): the mod's sounds no longer depend on the game's volume, and
+  their left/right position is exact (settings `IndependentAudio`, `ModSoundVolume`). Mount cries,
+  taken from the game, still use its audio engine.
+
+**Other**
+- DLC window: also mentions the wishlist button.
+- Gamepad: a shortcut held with LB no longer fires when RB is held too (LB+RB combinations).
+
 ## 0.11.0
 
 - **Sounds of objects**: every kind of object has its own short sound (castle, wall, tower, farm,

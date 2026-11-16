@@ -88,7 +88,7 @@ internal static class PassingAnnouncer
             var p = c.IsPayable ? c.Obj.TryCast<Payable>() : null;
             if (p != null) action = HoverAnnouncer.Analyze(player, p).ActionKey;
             var kind = c.Kind == ObjKind.Unknown ? ObjKind.Upgrade : c.Kind;
-            Earcons.Play(Earcons.KeyFor(c.Obj, kind, action), 0.9f, pan);
+            Earcons.Play(Earcons.KeyFor(c.Obj, kind, action), 0.9f, pan, "gallop");
         }
         catch { }
     }

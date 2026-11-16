@@ -60,6 +60,12 @@ public sealed class AccessSettings
     public bool CaveBeacon = true;
     /// <summary>A short chime when the object in front of the player can be paid right now.</summary>
     public bool PaySound = true;
+    /// <summary>During the tutorial, a beep leads to the ghost guide.</summary>
+    public bool TutorialBeacon = true;
+    /// <summary>Play the mod's sounds through its own audio output, independent of the game volume.</summary>
+    public bool IndependentAudio = true;
+    /// <summary>Volume of the mod's sounds on its own output (0 to 1).</summary>
+    public float ModSoundVolume = 1f;
     /// <summary>Play the earcon of the object selected by the game (castle, wall, tower, mount...).</summary>
     public bool HoverSounds = true;
     /// <summary>Default range of the sound radar (switched in game between 30, 50 and 100).</summary>
@@ -122,6 +128,9 @@ public sealed class AccessKeys
         D("SoundRadar", "N", "LB+Start", "Sound radar: the sound of each object around you, nearest first, on its side."),
         D("SoundRadarRange", "Ctrl+N", "RB+Start", "Sound radar range: 30, 50 or 100."),
         D("SoundLegend", "Alt+N", "", "Sound legend: listen to every object sound with its name."),
+        D("TutorialJournal", "F6", "LB+RB+X", "Tutorial journal: every step, what to do, done or not, where it is.", "U"),
+        D("ItemBeacon", "Ctrl+B", "LB+RB+Y", "Audio beacon on the selected item of the last list (or the object in front of you); press again to stop."),
+        D("StopBeacons", "Alt+B", "LB+RB+B", "Stop every audio beacon, the tutorial one included (until its next step)."),
         D("NextCategory", "Home", "LB+DpadDown", "Scanner: next category."),
         D("PreviousCategory", "Ctrl+Home", "LB+DpadUp", "Scanner: previous category.", "Shift+Home"),
         D("RepeatItem", "E", "LB+X", "Reread the selected item with its current distance.", "Ctrl+Home"),

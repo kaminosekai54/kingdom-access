@@ -105,6 +105,7 @@ public static class Gamepad
 /// </summary>
 public sealed class PadBinding
 {
+    private static readonly PadButton[] Layers = { PadButton.LB, PadButton.RB };
     public PadButton[] Held { get; }
     public PadButton Button { get; }
     public string Text { get; }
@@ -137,6 +138,9 @@ public sealed class PadBinding
     {
         if (Button == PadButton.None || !Gamepad.WasPressed(Button)) return false;
         foreach (var h in Held) if (!Gamepad.IsDown(h)) return false;
+        // LB+X must not fire for LB+RB+X: an extra layer button held means another shortcut.
+        foreach (var layer in Layers)
+            if (Gamepad.IsDown(layer) && Array.IndexOf(Held, layer) < 0 && layer != Button) return false;
         return true;
     }
 

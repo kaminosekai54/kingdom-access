@@ -6,13 +6,13 @@ using SpeechOut = KingdomAccess.Speech.Speech;
 namespace KingdomAccess.Features;
 
 /// <summary>
-/// DLC presentation window (title and artwork are images, only the button has text): announces
+/// DLC presentation window (PromoPopup since the October 2026 game update, formerly DlcPopup) (title and artwork are images, only the button has text): announces
 /// which DLC it presents and what the buttons do (play, buy, cancel), plus its purchase or error
 /// message when there is one.
 /// </summary>
 internal static class DlcPopupNarrator
 {
-    private static DlcPopup _popup;
+    private static PromoPopup _popup;
     private static float _nextLookup;
     private static bool _wasOpen, _announced;
     private static float _openSince;
@@ -22,7 +22,7 @@ internal static class DlcPopupNarrator
         if ((_popup == null || !_popup.isActiveAndEnabled) && now >= _nextLookup)
         {
             _nextLookup = now + 1f;
-            try { _popup = Object.FindFirstObjectByType<DlcPopup>(); } catch { _popup = null; }
+            try { _popup = Object.FindFirstObjectByType<PromoPopup>(); } catch { _popup = null; }
         }
 
         bool open = false;
@@ -78,13 +78,14 @@ internal static class DlcPopupNarrator
         var parts = new List<string>();
         try
         {
-            string type = _popup._shownDLCType.ToString();
+            string type = _popup.DLCType.ToString();
             string name = Loc.TryT("dlcname." + type.ToLowerInvariant()) ?? type;
             parts.Add(Loc.T("dlcpopup.title", name));
 
             bool play = Active(_popup._playButton), buy = Active(_popup._buyButton);
             if (play) parts.Add(Loc.T("dlcpopup.play"));
             else if (buy) parts.Add(Loc.T("dlcpopup.buy"));
+            if (Active(_popup._wishlistButton)) parts.Add(Loc.T("dlcpopup.wishlist"));
 
             string msg = Visible(_popup._purchaseText);
             if (!string.IsNullOrEmpty(msg)) parts.Add(msg);

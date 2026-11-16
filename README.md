@@ -7,7 +7,7 @@ with sounds when danger approaches.
 
 *[Version française](README.fr.md)*
 
-> Status: **beta (0.11.0)**. Developed and tested by a blind player with NVDA on Windows, on the
+> Status: **beta (0.12.0)**. Developed and tested by a blind player with NVDA on Windows, on the
 > Steam version of the game, mostly in the Norse Lands campaign. Feedback and bug reports are welcome.
 
 ---
@@ -76,6 +76,12 @@ with sounds when danger approaches.
 - Lost crown: alert with position, repeated until you pick it up; a key runs to it.
 - Dawn, day, evening and night: a sound and an announcement.
 - A short chime when the object in front of you can be paid right now.
+- Tutorial journal (F6): every step of the tutorial with what to do, whether it is done, and where it
+  is; walk there with End, or put a sound beacon on it with Ctrl+B.
+- Sound beacon (Ctrl+B) on any selected item (scanner, radar, journal): a beep leads you to it and
+  stops when you arrive.
+- Tutorial beacon: a beep leads you to the tutorial ghost, faster and louder when closer, on its
+  side; the hint is spoken when you get close, then "you are there" with the action to do.
 
 **Sounds of objects**
 - Every kind of object has its own short sound, played when the game selects it: castle, wall,
@@ -87,6 +93,8 @@ with sounds when danger approaches.
   Farther objects are quieter, and each sound plays only in the ear of its side. Range 30, 50 or
   100, switched in game.
 - **Sound legend**: listen to every sound with its name.
+- The mod plays its sounds through its own audio output ([NAudio](https://github.com/naudio/NAudio),
+  MIT): the game's volume does not lower them, and each sound is placed exactly left or right.
 - The object sounds come from [Kenney](https://kenney.nl)'s CC0 packs (Impact Sounds, RPG Audio,
   Interface Sounds, Casino Audio). Each one is a file in `BepInEx\plugins\KingdomAccess\Sounds\Earcons`
   (`castle.wav`, `wall.wav`...): replace it with any 16-bit WAV file to change the sound.
@@ -103,8 +111,8 @@ with sounds when danger approaches.
   boat parts (wreck, construction, set-sail point, boat).
 - Bomb expedition to the Greed cave: every stage is announced (escort, entrance, crossing,
   guardian, detonation, exit), and while you are beyond the cliff portal the scanner and radar
-  only show that area. Inside the cave, a heartbeat guides you to the bomb, where you have to
-  act: faster and louder when closer, in the ear of the side where it is. The bomb's description
+  only show that area. Inside the cave, the mod's beacon leads you nest after nest to the bomb,
+  then to the exit once the fuse is lit; each new target is announced. The bomb's description
   gives its current position, then the cliff portal's.
 
 ## What it does not do (yet)
@@ -146,6 +154,9 @@ split-screen co-op). Press **F1** in game for the list of your current shortcuts
 | N | Sound radar: the sound of each object around you, on its side |
 | Ctrl+N | Sound radar range: 30, 50 or 100 |
 | Alt+N | Sound legend (browse with Page Up / Page Down) |
+| F6 | Tutorial journal: every step, what to do, done or not, where it is |
+| Ctrl+B | Sound beacon on the selected item of the last list, or the object in front of you (press again to stop) |
+| Alt+B | Stop every beacon, the tutorial one included (until its next step) |
 | Home / Ctrl+Home | Scanner: next / previous category |
 | Page Up / Page Down | Previous / next item of the last list (scanner, radar, census, help, summary...) |
 | E | Reread the selected item with its current distance |
@@ -174,6 +185,8 @@ the pad, so a mod shortcut never drops a coin or moves the monarch.
 | B | Object in front of you | RS (click) | Run to the lost crown |
 | View | Repeat last message | View | Help |
 | Menu | Sound radar | Menu | Sound radar range |
+
+Hold **LB and RB** together, then **X** for the tutorial journal, **Y** for the sound beacon or **B** to stop every beacon.
 | RS (click) | Read the screen | LS (click) | Tutorial hint |
 | LS (click) | Screen texts list | LT / RT | Previous / next message |
 
@@ -190,20 +203,15 @@ the pad, so a mod shortcut never drops a coin or moves the monarch.
    Launch the game once so BepInEx generates its files (the first launch takes longer).
 2. **The mod.** Extract the release archive `KingdomAccess-<version>.zip` into the game folder (the
    one containing `KingdomTwoCrowns.exe`). You should get `BepInEx\plugins\KingdomAccess\` containing `KingdomAccess.BepInEx.dll`, `KingdomAccess.Core.dll`,
-   `Tolk.dll`, `nvdaControllerClient64.dll`, and the `Lang` and `Sounds` folders.
-3. **NVDA users: install the NVDA add-on** `kingdomAccessKeys` (attached to each release; open
-   the `.nvda-addon` file with NVDA running). NVDA normally stops speaking at every key press,
-   which cuts the mod's announcements all the time in a game. While Kingdom Two Crowns has the
-   focus, the add-on stops key presses from interrupting speech; the mod interrupts speech itself
-   when it has something new to say. Do not use NVDA's sleep mode in the game: it also silences
-   the mod.
-
-   **Without the add-on**, NVDA's own settings help part of the way: in NVDA's settings, Keyboard
-   category, uncheck "Speech interrupt for typed characters" and "Speech interrupt for Enter key".
-   Do it in a configuration profile for the game, so that it only applies there: with the game
-   focused, press NVDA+Ctrl+P, choose "New", select the "Current application" trigger, then change
-   the two settings while that profile is active. Arrow keys may still interrupt speech; the
-   add-on remains the most complete solution.
+   `NAudio.Core.dll`, `NAudio.WinMM.dll`, `Tolk.dll`, `nvdaControllerClient64.dll`, and the `Lang` and
+   `Sounds` folders.
+3. **Screen reader settings (recommended).** NVDA normally stops speaking at every key press,
+   which can cut the mod's announcements in a game. In NVDA's settings, Keyboard category, uncheck
+   "Speech interrupt for typed characters" and "Speech interrupt for Enter key". Do it in a
+   configuration profile for the game, so that it only applies there: with the game focused, press
+   NVDA+Ctrl+P, choose "New", select the "Current application" trigger, then change the two
+   settings while that profile is active. Do not use NVDA's sleep mode in the game: it also
+   silences the mod.
 
    **JAWS users**: if the arrow keys seem to do nothing in the game, JAWS's virtual cursor may be
    catching them; turn it off while playing.
@@ -221,7 +229,8 @@ shortcut is documented in the file. Sections:
 3. **Radar and scanner**: ranges, explored-area-only mode and its margin, destroyed portals.
 4. **Alerts and sounds**: enemy alert and its distance, crown alert, day phases, sounds, object
    sounds on hover (`HoverSounds`), sound radar range (`SoundRadarRange`) and delay between its
-   sounds (`SoundRadarDelay`), pay chime, cave heartbeat.
+   sounds (`SoundRadarDelay`), pay chime, Greed cave beacon (`CaveBeacon`), tutorial beacon (`TutorialBeacon`), the mod's own audio output (`IndependentAudio`) and its volume
+   (`ModSoundVolume`).
 5. **Menus**: menu narration, menu logging (development).
 6. **Keys**: every shortcut, e.g. `Wallet = O`, `Radar = V`, `TargetDetails = X`. Key names
    are Unity key names (`F5`, `PageDown`, `LeftArrow`...); modifiers are `Ctrl`, `Shift`, `Alt`.
@@ -249,7 +258,6 @@ These parts work in principle but have not been confirmed in game, or only partl
 - Announcements while galloping: may need tuning (too many or too few).
 - On-screen text reading: may be too talkative in some places (can be turned off).
 - Multiplayer features.
-- Greed cave heartbeat: first version, to be tuned (it can be turned off with `CaveBeacon = false`).
 - Object sounds and sound radar: are the sounds distinct and clear enough? (listen with Alt+N).
 
 When something is wrong, `Alt+F3` next to it writes the whole island to
@@ -265,8 +273,8 @@ launched once (the build references the interop assemblies BepInEx generates).
 2. If the game is not in the default Steam folder, edit `GameDir` in `Directory.Build.props`.
 3. `dotnet build KingdomAccess.slnx -c Release` builds and installs the mod into the game
    (close the game first). Add `-p:NoDeploy=true` to build without installing.
-4. `python tools/make_release.py` builds the release files into `dist/`: the zip to extract into
-   the game folder, and the NVDA add-on.
+4. `python tools/make_release.py` builds the release zip into `dist/`, to extract into the game
+   folder.
 
 Project layout:
 
@@ -278,9 +286,8 @@ src/KingdomAccess.Core      the mod itself, independent of the mod loader
   Features/               announcements, scanner, radar, reports, auto-walk, menus, alerts...
   Patches/                Harmony patches (world map, blazon editor)
 src/KingdomAccess.BepInEx   BepInEx 6 IL2CPP adapter (entry point, configuration file)
-nvda-addon/                 NVDA add-on: game keys do not interrupt speech (build: python tools/build_nvda_addon.py)
 Localization/             mod texts, one file per language
-tools/                    sound generator, localization checks, NVDA add-on build, research helpers
+tools/                    sound generator, localization checks, release script, research helpers
 ```
 
 

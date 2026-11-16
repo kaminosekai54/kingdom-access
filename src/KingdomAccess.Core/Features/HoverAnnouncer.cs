@@ -19,6 +19,9 @@ internal static class HoverAnnouncer
     private const float RepeatSuppression = 4f;
 
     private static Payable _last;
+    /// <summary>Object currently selected by the game (in front of the player), or null.</summary>
+    public static Component CurrentTarget => _last != null && _last.gameObject.activeInHierarchy ? _last : null;
+    public static string CurrentName => _last != null ? ObjectNames.Identify(_last).Name : null;
     private static string _lastMessage = "";
     private static Payable _candidate;
     private static float _candidateSince;
@@ -74,7 +77,7 @@ internal static class HoverAnnouncer
                 Steed steed = null;
                 if (a.Info.Kind == ObjKind.Steed) { try { steed = target.GetComponentInChildren<Steed>(true); } catch { } }
                 if (steed != null) Earcons.PlayMount(steed, 0.9f, 0f);
-                else Earcons.Play(Earcons.KeyFor(target, a.Info.Kind, a.ActionKey), 0.9f, 0f);
+                else Earcons.Play(Earcons.KeyFor(target, a.Info.Kind, a.ActionKey), 0.9f, 0f, "hover");
                 earcon = true;
             }
             // The "you can pay here" chime follows the object sound.

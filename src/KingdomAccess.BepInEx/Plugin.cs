@@ -84,9 +84,15 @@ public class Plugin : BasePlugin
         s.AnnounceDayPhases = cfg.Bind(alerts, "AnnounceDayPhases", d.AnnounceDayPhases,
             "Sound and speech at dawn, day, evening and night.").Value;
         s.CaveBeacon = cfg.Bind(alerts, "CaveBeacon", d.CaveBeacon,
-            "Inside the Greed cave, a heartbeat guides you to the bomb's detonation point (faster and louder when closer, on the side of the point).").Value;
+            "Greed cave: a beacon leads you nest after nest to the bomb, then to the exit once the fuse is lit.").Value;
         s.PaySound = cfg.Bind(alerts, "PaySound", d.PaySound,
             "Short chime when the object in front of you can be paid right now.").Value;
+        s.TutorialBeacon = cfg.Bind(alerts, "TutorialBeacon", d.TutorialBeacon,
+            "During the tutorial, a beep leads to the ghost guide (faster and louder when closer, on its side); the hint is spoken when close and when you are on it.").Value;
+        s.IndependentAudio = cfg.Bind(alerts, "IndependentAudio", d.IndependentAudio,
+            "Play the mod's sounds through its own audio output: the game volume does not lower them.").Value;
+        s.ModSoundVolume = cfg.Bind(alerts, "ModSoundVolume", d.ModSoundVolume,
+            "Volume of the mod's sounds on its own output, from 0 to 1.").Value;
         s.HoverSounds = cfg.Bind(alerts, "HoverSounds", d.HoverSounds,
             "Play the sound of the object selected by the game (castle, wall, tower, farm, mount cry...).").Value;
         var radarRange = cfg.Bind(alerts, "SoundRadarRange", d.SoundRadarRange,

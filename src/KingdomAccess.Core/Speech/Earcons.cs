@@ -99,10 +99,24 @@ internal static class Earcons
 
     // ---------- Playing ----------
 
-    /// <summary>Plays the sound of a key (see <see cref="KeyFor"/>).</summary>
-    public static void Play(string key, float volume, float pan)
+    private static readonly HashSet<string> Logged = new();
+    internal static IModLog Log;
+
+    /// <summary>Plays the sound of a key (see <see cref="KeyFor"/>). source: who asks (diagnostics).</summary>
+    private static readonly Dictionary<string, float[]> Mixed = new();
+
+    public static void Play(string key, float volume, float pan, string source = null)
     {
+        if (!GameAudio.Enabled) return;
+        if (!Mixed.TryGetValue(key, out var samples)) { samples = Samples_(key); Mixed[key] = samples; }
+        if (ModAudio.Play(samples, volume, pan))
+        {
+            if (Logged.Add((source ?? "") + "|" + key)) Log?.Info($"[Sound] {source ?? "?"} -> {key}: mod output, volume {volume:0.00}");
+            return;
+        }
         var clip = Get(key);
+        if (Logged.Add((source ?? "") + "|" + key))
+            Log?.Info($"[Sound] {source ?? "?"} -> {key}: {(clip != null ? $"{clip.length:0.00}s" : "NO CLIP")}, volume {volume:0.00}, enabled {GameAudio.Enabled}");
         if (clip != null) GameAudio.PlayClip(clip, volume, pan);
     }
 

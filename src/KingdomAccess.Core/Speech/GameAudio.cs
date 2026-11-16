@@ -20,7 +20,7 @@ internal static class GameAudio
     /// </summary>
     private static AudioSource[] _pool;
     private static int _next;
-    private static AudioClip _heartbeat, _chime;
+    private static AudioClip _heartbeat, _chime, _beep;
     public static bool Enabled = true;
     internal static IModLog Log;
     private static bool _selfTestDone;
@@ -73,6 +73,7 @@ internal static class GameAudio
             _source = _pool[0];
             _heartbeat = Make("ka_heartbeat", HeartbeatSamples());
             _chime = Make("ka_chime", ChimeSamples());
+            _beep = Make("ka_beep", BeepSamples());
             return true;
         }
         catch (Exception ex) { Log?.Error($"[Audio] Could not create the audio sources: {ex}"); _source = null; return false; }
@@ -172,10 +173,45 @@ internal static class GameAudio
     }
 
     /// <summary>Plays the heartbeat. pan: -1 left to 1 right; volume: 0 to 1.</summary>
-    public static void Heartbeat(float volume, float pan) => Play(_heartbeat, volume, pan, true);
+    public static void Heartbeat(float volume, float pan)
+    {
+        if (Enabled && ModAudio.Play(_heartbeatSamples ??= HeartbeatSamples(), volume, pan)) return;
+        Play(_heartbeat, volume, pan, true);
+    }
+
+    /// <summary>Short bright beep: the tutorial beacon.</summary>
+    private static float[] BeepSamples()
+    {
+        // A clear, full-strength beep: square-ish tone, 120 ms, flat envelope with soft edges.
+        int n = (int)(Rate * 0.12f);
+        var s = new float[n];
+        for (int i = 0; i < n; i++)
+        {
+            float t = i / (float)Rate;
+            float edge = Mathf.Min(1f, Mathf.Min(i, n - i) / 220f);
+            float w = Mathf.Sin(2f * Mathf.PI * 988f * t);
+            s[i] = 0.95f * edge * Mathf.Clamp(w * 3f, -1f, 1f);
+        }
+        return s;
+    }
+
+    private static float[] _beepSamples, _heartbeatSamples, _chimeSamples;
+
+    /// <summary>Plays the beacon beep. pan: -1 left to 1 right; volume: 0 to 1.</summary>
+    public static void Beep(float volume, float pan)
+    {
+        if (!Enabled) return;
+        if (ModAudio.Play(_beepSamples ??= BeepSamples(), volume, pan)) return;
+        if (!Ensure()) return;
+        PlayClip(_beep, volume, pan);
+    }
 
     /// <summary>Plays the "you can pay here" chime.</summary>
-    public static void Chime() => Play(_chime, 0.8f, 0f, false);
+    public static void Chime()
+    {
+        if (Enabled && ModAudio.Play(_chimeSamples ??= ChimeSamples(), 0.8f, 0f)) return;
+        Play(_chime, 0.8f, 0f, false);
+    }
 
     private static void Play(AudioClip clip, float volume, float pan, bool isHeartbeat)
     {

@@ -15,7 +15,7 @@ namespace KingdomAccess;
 /// </summary>
 public static class AccessMod
 {
-    public const string Version = "0.11.0";
+    public const string Version = "0.12.0";
 
     private static ModContext _ctx;
     private static bool _initialized;
@@ -38,6 +38,10 @@ public static class AccessMod
         GameAudio.Enabled = ctx.Settings.SoundsEnabled;
         GameAudio.Log = log;
         Earcons.Initialize(ctx.ModDirectory);
+        Earcons.Log = log;
+        ModAudio.Log = log;
+        ModAudio.Enabled = ctx.Settings.IndependentAudio;
+        ModAudio.Volume = Mathf.Clamp01(ctx.Settings.ModSoundVolume);
         GameState.SetLog(log);
         BiomeSelectPatches.Log = log;
         TutorialNarrator.Log = log;
@@ -127,25 +131,26 @@ public static class AccessMod
             }
 
             if (!s.Enabled) return;
-            StartupNarrator.Tick(now);
+            // Each feature runs on its own: one failing (e.g. a class renamed by a game update)
+            // must not stop the others. See Safe().
+            Safe("Startup", () => StartupNarrator.Tick(now));
 
             // Gamepad: read it, and block the game's own pad input while a mod layer is held.
-            if (s.GamepadEnabled) Gamepad.Poll();
-            GameInputBlocker.Tick(s);
-            SoundRadar.Tick(now);
+            Safe("Gamepad", () => { if (s.GamepadEnabled) Gamepad.Poll(); GameInputBlocker.Tick(s); });
+            Safe("SoundRadar", () => SoundRadar.Tick(now));
 
             // Menus and screens that exist outside of gameplay.
-            HandleGlobalKeys(s);
-            MenuNarrator.Tick(s, _ctx.Log, now);
-            DlcPopupNarrator.Tick(now);
-            DlcPopupNarrator.TickPeaceful(now);
+            Safe("GlobalKeys", () => HandleGlobalKeys(s));
+            Safe("Menus", () => MenuNarrator.Tick(s, _ctx.Log, now));
+            Safe("DlcPopup", () => DlcPopupNarrator.Tick(now));
+            Safe("PeacefulPopup", () => DlcPopupNarrator.TickPeaceful(now));
             if (s.MenuNarration)
             {
-                MapNarrator.Tick(now);
-                NewGameNarrator.Tick(now);
-                StatsNarrator.Tick(now);
+                Safe("Map", () => MapNarrator.Tick(now));
+                Safe("NewGame", () => NewGameNarrator.Tick(now));
+                Safe("Stats", () => StatsNarrator.Tick(now));
             }
-            ScreenText.Tick(s, now);
+            Safe("ScreenText", () => ScreenText.Tick(s, now));
 
             var player = GameState.Player;
             if (player == null) { _currentPlayer = null; AutoWalk.Stop(); return; }
@@ -157,25 +162,56 @@ public static class AccessMod
             }
 
             // Gameplay.
-            UnitCache.Tick(now);
-            Exploration.Tick(player);
-            if (!ExternalKeyCapture) HandleGameKeys(player, s);
-            AutoWalk.Tick(player, now);
-            if (s.AnnounceHover) HoverAnnouncer.Tick(player, s, now);
-            if (s.AnnouncePassing) PassingAnnouncer.Tick(player, s, now);
-            Zones.Tick(player, s, now, Time.unscaledDeltaTime);
-            DayClock.Tick(s, _ctx.Log, now);
-            EnemyAlert.Tick(player, s, now);
-            Abilities.Tick(player, s, now);
-            TutorialNarrator.Tick(player, s, now);
-            DlcObjects.Tick(now);
-            if (s.CrownAlert) CrownWatcher.Tick(player, now);
-            CaveNarrator.Tick(player, now);
-            if (s.CaveBeacon) CaveNarrator.BeaconTick(player, now);
+            Safe("UnitCache", () => UnitCache.Tick(now));
+            Safe("Exploration", () => Exploration.Tick(player));
+            if (!ExternalKeyCapture) Safe("GameKeys", () => HandleGameKeys(player, s));
+            Safe("AutoWalk", () => AutoWalk.Tick(player, now));
+            if (s.AnnounceHover) Safe("Hover", () => HoverAnnouncer.Tick(player, s, now));
+            if (s.AnnouncePassing) Safe("Passing", () => PassingAnnouncer.Tick(player, s, now));
+            Safe("Zones", () => Zones.Tick(player, s, now, Time.unscaledDeltaTime));
+            Safe("DayClock", () => DayClock.Tick(s, _ctx.Log, now));
+            Safe("EnemyAlert", () => EnemyAlert.Tick(player, s, now));
+            Safe("Abilities", () => Abilities.Tick(player, s, now));
+            Safe("Tutorial", () => TutorialNarrator.Tick(player, s, now));
+            if (s.TutorialBeacon) Safe("TutorialBeacon", () => TutorialNarrator.BeaconTick(player, s, now));
+            Safe("DlcObjects", () => DlcObjects.Tick(now));
+            if (s.CrownAlert) Safe("Crown", () => CrownWatcher.Tick(player, now));
+            Safe("Cave", () => CaveNarrator.Tick(player, now));
+            if (s.CaveBeacon) Safe("CaveBeacon", () => CaveNarrator.BeaconTick(player, now));
+            Safe("ItemBeacon", () => ItemBeacon.Tick(player, now));
         }
         catch (Exception ex)
         {
             _ctx.Log.Error($"[Tick] {ex}");
+        }
+    }
+
+    private static readonly System.Collections.Generic.Dictionary<string, int> Failures = new();
+    private static readonly System.Collections.Generic.HashSet<string> Disabled = new();
+
+    /// <summary>
+    /// Runs one feature. Its first error is logged; after 20 errors in a row (typically a class
+    /// renamed or removed by a game update) that feature is switched off for the session and the
+    /// rest of the mod keeps working.
+    /// </summary>
+    private static void Safe(string feature, Action run)
+    {
+        if (Disabled.Contains(feature)) return;
+        try
+        {
+            run();
+            Failures[feature] = 0;
+        }
+        catch (Exception ex)
+        {
+            Failures.TryGetValue(feature, out int n);
+            Failures[feature] = ++n;
+            if (n == 1) _ctx.Log.Error($"[{feature}] {ex}");
+            if (n >= 20)
+            {
+                Disabled.Add(feature);
+                _ctx.Log.Warn($"[{feature}] switched off after repeated errors (game update?). The rest of the mod keeps working.");
+            }
         }
     }
 
@@ -201,6 +237,7 @@ public static class AccessMod
         PassingAnnouncer.Reset();
         GameInputBlocker.Release();
         SoundRadar.Stop();
+        ItemBeacon.Stop();
     }
 
     // ---------- Shortcuts ----------
@@ -247,6 +284,10 @@ public static class AccessMod
         if (Hit(k, "Radar")) Radar.Pulse(player, s);
         if (Hit(k, "TargetDetails")) Reports.TargetDetails(player, s);
         if (Hit(k, "SoundRadar")) SoundRadar.Scan(player);
+        if (Hit(k, "TutorialJournal")) TutorialJournal.Toggle(player);
+        if (TutorialJournal.IsOpen && Input.GetKeyDown(KeyCode.Escape)) TutorialJournal.Close();
+        if (Hit(k, "ItemBeacon")) ItemBeacon.Toggle();
+        if (Hit(k, "StopBeacons")) ItemBeacon.StopAll();
         if (Hit(k, "SoundRadarRange")) SoundRadar.CycleRange();
 
         if (Hit(k, "NextCategory")) CategoryScanner.ChangeCategory(player, 1, s);

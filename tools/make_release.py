@@ -1,6 +1,5 @@
 # Builds the release files into dist/:
 #   KingdomAccess-<version>.zip          extract into the game folder (contains BepInEx/plugins/KingdomAccess/)
-#   kingdomAccessKeys-<version>.nvda-addon  NVDA add-on
 # Run after "dotnet build KingdomAccess.slnx -c Release". Needs lib/native/Tolk.dll and
 # lib/native/nvdaControllerClient64.dll (see lib/native/README.md).
 import os, re, subprocess, sys, zipfile
@@ -16,6 +15,8 @@ target = "BepInEx/plugins/KingdomAccess/"
 files = {
     "KingdomAccess.BepInEx.dll": os.path.join(OUT, "KingdomAccess.BepInEx.dll"),
     "KingdomAccess.Core.dll": os.path.join(OUT, "KingdomAccess.Core.dll"),
+    "NAudio.Core.dll": os.path.join(OUT, "NAudio.Core.dll"),
+    "NAudio.WinMM.dll": os.path.join(OUT, "NAudio.WinMM.dll"),
     "Tolk.dll": os.path.join(ROOT, "lib", "native", "Tolk.dll"),
     "nvdaControllerClient64.dll": os.path.join(ROOT, "lib", "native", "nvdaControllerClient64.dll"),
 }
@@ -37,6 +38,8 @@ Tolk.dll - Tolk screen reader abstraction library, https://github.com/dkager/tol
 nvdaControllerClient64.dll - NVDA controller client, NV Access, https://www.nvaccess.org
   License: GNU Lesser General Public License v2.1.
 
+NAudio.Core.dll, NAudio.WinMM.dll - NAudio, Mark Heath and contributors, https://github.com/naudio/NAudio
+  License: MIT.
 Sounds/Earcons/*.wav - sounds from Kenney (https://kenney.nl): Impact Sounds, RPG Audio,
   Interface Sounds and Casino Audio packs. License: Creative Commons CC0 (public domain).
   Trimmed and normalised.
@@ -54,9 +57,3 @@ with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
     z.write(os.path.join(ROOT, "README.fr.md"), target + "README.fr.md")
 print(zip_path)
 
-# NVDA add-on, built next to the zip.
-subprocess.run([sys.executable, os.path.join(ROOT, "tools", "build_nvda_addon.py")], check=True)
-for f in os.listdir(ROOT):
-    if f.endswith(".nvda-addon"):
-        os.replace(os.path.join(ROOT, f), os.path.join(DIST, f))
-        print(os.path.join(DIST, f))

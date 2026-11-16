@@ -17,6 +17,8 @@ internal sealed class NavEntry
     public Component Target;
     /// <summary>Called each time the item is read (e.g. to play its sound in the sound legend).</summary>
     public System.Action OnRead;
+    /// <summary>Text computed at each reading (live distance, state...); replaces Text when set.</summary>
+    public System.Func<string> Live;
 }
 
 /// <summary>
@@ -77,6 +79,15 @@ internal static class ListNav
         _entries[_index].OnRead?.Invoke();
     }
 
+    /// <summary>True if this list is the one currently browsed.</summary>
+    public static bool IsShowing(List<NavEntry> entries) => _mode == Mode.Static && ReferenceEquals(_entries, entries);
+
+    /// <summary>Selects an item of the current list without reading it.</summary>
+    public static void Select(int index)
+    {
+        if (_mode == Mode.Static && index >= 0 && index < _entries.Count) _index = index;
+    }
+
     public static Component SelectedTarget =>
         _mode == Mode.Scanner ? CategoryScanner.Selected
         : (_index >= 0 && _index < _entries.Count ? _entries[_index].Target : null);
@@ -95,7 +106,9 @@ internal static class ListNav
     private static string Read(Player player, int i)
     {
         var e = _entries[i];
-        string text = e.Text ?? e.Name;
+        string live = null;
+        try { live = e.Live?.Invoke(); } catch { }
+        string text = live ?? e.Text ?? e.Name;
         if (e.Text == null && e.Target != null && player != null)
         {
             float dx = e.Target.transform.position.x - GameState.PlayerX(player);

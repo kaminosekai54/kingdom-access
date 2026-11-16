@@ -7,7 +7,7 @@ vous prévient par des sons quand le danger approche.
 
 *[English version](README.md)*
 
-> État : **bêta (0.11.0)**. Développé et testé par un joueur aveugle avec NVDA sous Windows, sur la
+> État : **bêta (0.12.0)**. Développé et testé par un joueur aveugle avec NVDA sous Windows, sur la
 > version Steam du jeu, surtout dans la campagne des Terres du Nord. Retours et signalements de
 > bugs bienvenus.
 
@@ -65,6 +65,13 @@ vous prévient par des sons quand le danger approche.
   touche vous y fait courir.
 - Aube, jour, soir et nuit : un son et une annonce.
 - Un petit carillon quand l'objet devant vous peut être payé tout de suite.
+- Journal du tutoriel (F6) : chaque étape du tutoriel avec quoi faire, si elle est faite et où elle se
+  trouve ; Fin pour y marcher, Ctrl+B pour y poser une balise sonore.
+- Balise sonore (Ctrl+B) sur n'importe quel élément choisi (scanner, radar, journal) : un bip vous y
+  mène et s'arrête à l'arrivée.
+- Balise du tutoriel : un bip vous mène au fantôme du tutoriel, plus rapide et plus fort en
+  approchant, de son côté ; l'indice est lu quand vous êtes proche, puis « Vous y êtes » avec
+  l'action à faire.
 
 **Sons des objets**
 - Chaque type d'objet a son propre son bref, joué quand le jeu le sélectionne : château, mur, tour,
@@ -77,6 +84,8 @@ vous prévient par des sons quand le danger approche.
   l'un après l'autre. Plus l'objet est loin, plus le son est faible, et chaque son ne joue que dans
   l'oreille de son côté. Portée de 30, 50 ou 100, changée en jeu.
 - **Légende des sons** : écoutez chaque son avec son nom.
+- Le mod joue ses sons par sa propre sortie audio ([NAudio](https://github.com/naudio/NAudio), MIT) :
+  le volume du jeu ne les baisse pas, et chaque son est placé exactement à gauche ou à droite.
 - Les sons des objets viennent des ensembles CC0 de [Kenney](https://kenney.nl) (Impact Sounds, RPG
   Audio, Interface Sounds, Casino Audio). Chacun est un fichier de `BepInEx\plugins\KingdomAccess\Sounds\Earcons`
   (`castle.wav`, `wall.wav`...) : remplacez-le par n'importe quel fichier WAV 16 bits pour changer le son.
@@ -94,9 +103,8 @@ vous prévient par des sons quand le danger approche.
   distincts pour les parties du bateau (épave, construction, départ en mer, bateau).
 - Expédition de la bombe vers la grotte des Greed : chaque étape est annoncée (escorte, entrée,
   traversée, gardien, détonation, sortie), et tant que vous êtes au-delà du portail de la falaise,
-  le scanner et le radar ne montrent que cette zone. Dans la grotte, un battement de cœur vous guide
-  vers la bombe, là où vous devez agir : plus rapide et plus fort en approchant, du côté où elle se
-  trouve. La description de la bombe donne sa position actuelle, puis celle du portail de la falaise.
+  le scanner et le radar ne montrent que cette zone. Dans la grotte, la balise du mod vous mène nid après nid jusqu'à la
+  bombe, puis vers la sortie une fois la mèche allumée ; chaque nouvelle cible est annoncée. La description de la bombe donne sa position actuelle, puis celle du portail de la falaise.
 
 ## Ce que le mod ne fait pas (encore)
 
@@ -138,6 +146,9 @@ droite (G et J lancent aussi l'écran partagé). **F1** en jeu donne la liste de
 | N | Radar sonore : le son de chaque objet autour de vous, de son côté |
 | Ctrl+N | Portée du radar sonore : 30, 50 ou 100 |
 | Alt+N | Légende des sons (Page haut / Page bas pour parcourir) |
+| F6 | Journal du tutoriel : chaque étape, quoi faire, faite ou non, où elle se trouve |
+| Ctrl+B | Balise sonore sur l'élément choisi de la dernière liste, ou l'objet devant vous (nouvel appui pour arrêter) |
+| Alt+B | Arrêter toutes les balises, celle du tutoriel comprise (jusqu'à l'étape suivante) |
 | Origine / Ctrl+Origine | Scanner : catégorie suivante / précédente |
 | Page haut / Page bas | Élément précédent / suivant de la dernière liste (scanner, radar, recensement, aide, résumé...) |
 | E | Relire l'élément choisi avec sa distance à jour |
@@ -167,6 +178,8 @@ et ne fait jamais bouger le monarque.
 | B | Objet devant vous | Clic du stick droit | Courir vers la couronne perdue |
 | Affichage | Répéter le dernier message | Affichage | Aide |
 | Menu | Radar sonore | Menu | Portée du radar sonore |
+
+Maintenez **LB et RB** ensemble, puis **X** pour le journal du tutoriel, **Y** pour la balise sonore ou **B** pour arrêter toutes les balises.
 | Clic du stick droit | Relire l'écran | Clic du stick gauche | Indice du tutoriel |
 | Clic du stick gauche | Liste des textes à l'écran | LT / RT | Message précédent / suivant |
 
@@ -183,21 +196,16 @@ et ne fait jamais bouger le monarque.
    Lancez le jeu une fois pour que BepInEx crée ses fichiers (le premier lancement est plus long).
 2. **Le mod.** Décompressez l'archive `KingdomAccess-<version>.zip` dans le dossier du jeu (celui qui
    contient `KingdomTwoCrowns.exe`). Vous devez obtenir `BepInEx\plugins\KingdomAccess\` avec `KingdomAccess.BepInEx.dll`,
-   `KingdomAccess.Core.dll`, `Tolk.dll`, `nvdaControllerClient64.dll` et les dossiers `Lang` et `Sounds`.
-3. **Utilisateurs de NVDA : installez le module complémentaire NVDA** `kingdomAccessKeys` (joint à
-   chaque version ; ouvrez le fichier `.nvda-addon` avec NVDA lancé). NVDA coupe normalement la
-   parole à chaque touche pressée, ce qui interrompt sans cesse les annonces du mod dans un jeu.
-   Tant que Kingdom Two Crowns a le focus, le module empêche les touches de couper la parole ; le
-   mod coupe lui-même la parole quand il a quelque chose de nouveau à dire. N'utilisez pas le mode
-   veille de NVDA dans le jeu : il fait aussi taire le mod.
-
-   **Sans le module**, les réglages de NVDA aident en partie : dans les paramètres de NVDA, catégorie
-   Clavier, décochez « Interrompre la parole pour les caractères tapés » et « Interrompre la parole
-   pour la touche Entrée ». Faites-le dans un profil de configuration propre au jeu, pour que ça ne
-   s'applique que là : le jeu ayant le focus, appuyez sur NVDA+Ctrl+P, choisissez « Nouveau »,
-   sélectionnez le déclencheur « Application actuelle », puis changez les deux réglages pendant que
-   ce profil est actif. Les flèches peuvent encore couper la parole ; le module reste la solution la
-   plus complète.
+   `KingdomAccess.Core.dll`, `NAudio.Core.dll`, `NAudio.WinMM.dll`, `Tolk.dll`, `nvdaControllerClient64.dll`
+   et les dossiers `Lang` et `Sounds`.
+3. **Réglages du lecteur d'écran (conseillé).** NVDA coupe normalement la parole à chaque touche
+   pressée, ce qui peut interrompre les annonces du mod dans un jeu. Dans les paramètres de NVDA,
+   catégorie Clavier, décochez « Interrompre la parole pour les caractères tapés » et « Interrompre
+   la parole pour la touche Entrée ». Faites-le dans un profil de configuration propre au jeu, pour
+   que ça ne s'applique que là : le jeu ayant le focus, appuyez sur NVDA+Ctrl+P, choisissez
+   « Nouveau », sélectionnez le déclencheur « Application actuelle », puis changez les deux réglages
+   pendant que ce profil est actif. N'utilisez pas le mode veille de NVDA dans le jeu : il fait aussi
+   taire le mod.
 
    **Utilisateurs de JAWS** : si les flèches semblent sans effet dans le jeu, le curseur virtuel de
    JAWS les capture peut-être ; désactivez-le pendant que vous jouez.
@@ -215,7 +223,9 @@ raccourci y est documenté (en anglais). Sections :
 3. **Radar and scanner** : portées, limitation à la zone explorée et sa marge, portails détruits.
 4. **Alerts and sounds** : alerte ennemis et sa distance, alerte couronne, moments de la journée, sons,
    sons des objets au survol (`HoverSounds`), portée du radar sonore (`SoundRadarRange`) et délai entre
-   ses sons (`SoundRadarDelay`), carillon de paiement, battement de cœur de la grotte.
+   ses sons (`SoundRadarDelay`), carillon de paiement, balise de la grotte (`CaveBeacon`), balise du
+   tutoriel (`TutorialBeacon`), sortie audio propre au mod (`IndependentAudio`) et son volume
+   (`ModSoundVolume`).
 5. **Menus** : lecture des menus, journal des menus (développement).
 6. **Keys** : chaque raccourci, par exemple `Wallet = O`, `Radar = V`, `TargetDetails = X`.
    Les noms de touches sont ceux d'Unity (`F5`, `PageDown`, `LeftArrow`...) ; les modificateurs
@@ -244,7 +254,6 @@ Ces parties fonctionnent en principe mais n'ont pas été confirmées en jeu, ou
 - Annonces au galop : peuvent demander un réglage (trop ou pas assez).
 - Lecture des textes à l'écran : peut être trop bavarde par endroits (désactivable).
 - Fonctions multijoueur.
-- Battement de cœur de la grotte : première version, à régler (désactivable avec `CaveBeacon = false`).
 - Sons des objets et radar sonore : les sons sont-ils assez distincts et clairs ? (à écouter avec Alt+N).
 
 Quand quelque chose ne va pas, `Alt+F3` à côté écrit toute l'île dans
